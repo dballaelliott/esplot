@@ -1,0 +1,12 @@
+#ignore helpers
+test.do
+formal_tests.do
+get_data.do
+
+#ignore logs
+logs/*/*
+
+# ignore data
+*.dta 
+*.training2
+
