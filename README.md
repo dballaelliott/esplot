@@ -1,4 +1,4 @@
-# esplot
+# esplot (_under contruction_)
 
 Event study plots are increasingly popular in applied research. _esplot_ is a new command for stata allowing researchers to quickly and easily create event study plots.
 
