@@ -1,6 +1,7 @@
 #ignore helpers
 test.do
 formal_tests.do
+log_program.ado
 get_data.do
 
 #ignore logs
@@ -8,5 +9,6 @@ logs/*/*
 
 # ignore data
 *.dta 
-*.training2
+*.csv
 
+test.do
