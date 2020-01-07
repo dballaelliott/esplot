@@ -26,7 +26,11 @@ esplot paygrade, by(male) event(to_male_mgr) window(-20 30)
 
 ... but is also flexible enough to allow for a range of powerful specifications and customizations. 
 ```stata
-esplot paygrade, by(male) event(to_male_mgr, replace save) compare(to_fem_mgr, replace save) absorb(idn i.male##i.monthn) window(-30 30) period_length(3) vce(cluster idn mgr_id) estimate_reference 
+esplot paygrade, \\\
+    by(male) event(to_male_mgr, replace save)  \\\ 
+    compare(to_fem_mgr, replace save) \\\
+    absorb(idn i.male##i.monthn) vce(cluster idn mgr_id)  \\\
+    window(-30 30) period_length(3) estimate_reference 
 ```
 ![Example Figure](img/img5.svg "Example Figure")
 
@@ -71,7 +75,9 @@ Since the underlying time periods are months, when we set period length to 3, we
 import delimited "training2.csv", clear
 
 **include replace in case we want to do this iteratively**
- esplot paygrade, by(male) event(to_male_mgr) window(-20 30) period_length(12) savedata(event_study_coefs, replace)
+ esplot paygrade, by(male) event(to_male_mgr) \\\
+    window(-20 30) period_length(12) \\\
+    savedata(event_study_coefs, replace)
 
  use event_study_coefs, clear
 
