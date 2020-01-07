@@ -33,9 +33,9 @@ esplot paygrade, \\\
 ![Example Figure](img/img5.svg "Example Figure")
 
 All that we were <span id="a3">*[required](#fn3 "While not required, specifying a window is highly recommended.")*</span> to type is the dependent variable and an event dummy. For example:
-```stata
-esplot paygrade, event(to_male_mgr)
-```
+
+`esplot paygrade, event(to_male_mgr)`
+
  `esplot` does the work behind the scenes to generate a full vector of event "lags" and "leads", so that the researcher can directly call `esplot` with minimal additional cleaning. While `by` is not explicitly required; easy comparison across groups however, is at the heart of many event studies.
 
 
@@ -95,7 +95,7 @@ Even more fun things still to come! More graphical options; bounds on attrition.
 
 [↩](#a2 "Back") <span id="f2">Since `esplot` relies on time series functions to track individuals over time, data must be `tsset` before calling `esplot`.</span>
 
- [↩](#a3 "Back") <span id="f3"> The `window(numlist)` option tells `esplot` how many periods before and after the event it should try to plot. When the option is not specified, it will estimate an event window equal to twice the time span of the entire panel. This can cause runtime to be poor; especially in large datasets. In practice, there are often few or no observations near the endpoints of the panel (i.e. at event time t= +/- T), and so these time periods fall out. There is a still a runtime cost.
+ [↩](#a3 "Back") <span id="fn3"> The `window(numlist)` option tells `esplot` how many periods before and after the event it should try to plot. When the option is not specified, it will estimate an event window equal to twice the time span of the entire panel. This can cause runtime to be poor; especially in large datasets. In practice, there are often few or no observations near the endpoints of the panel (i.e. at event time t= +/- T), and so these time periods fall out. There is a still a runtime cost.
  </span>
 
 
