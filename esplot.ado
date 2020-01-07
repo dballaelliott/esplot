@@ -1,4 +1,4 @@
-/*! version alpha-1.0  7jan2020 Dylan Balla-Elliott, dballaelliott@hbs.edu */
+/*! version alpha-1.0.1  7jan2020 Dylan Balla-Elliott, dballaelliott@hbs.edu */
 
 cap program drop esplot
 program define esplot, eclass sortpreserve
@@ -92,6 +92,10 @@ else local omitted_threshold = - `period_length' - 1
 if "`by'" != "" local pass_by = "by(`by')"
 local pass_window = "window(`first_period' `last_period')"
 
+if "`by'" == "" & "`difference'" != ""{
+	di as error "Error:" as input "by" as error "is required to use" as input "difference"
+	exit 
+}
 /* PARSE EVENT AND COMPARE */
 
 tokenize `: subinstr local event "," "|" ', parse("|")
