@@ -1,21 +1,100 @@
-# esplot (_under contruction_)
+# esplot: a stata package for event study plots
 
-Event study plots are increasingly popular in applied research. _esplot_ is a new command for stata allowing researchers to quickly and easily create event study plots.
+Event study plots are increasingly popular in applied research. `esplot` is a new command for stata allowing researchers to quickly and easily create event study plots.
 
 ## Install
 
 1. Install from within stata
 
-   `net install esplot, from("https://raw.githubusercontent.com/delliotthart/esplot/master/")`
+   `net install esplot, from("https://raw.githubusercontent.com/dballaelliott/esplot/master/")`
 
 2. Download/clone from github
 
-   The github repository can be found [here](https://raw.githubusercontent.com/delliotthart/esplot/master/README.md).
+   The github repository can be found [here](https://github.com/dballaelliott/esplot).
 
-## Example
+## Key Features
 
-syntax can be as simple...  
-`esplot wage, event(treatment) by(gender)`  
-or as complicated...  
-`do - like - all of the options`  
-as you want!
+While there are many approaches to creating event study plots, most require data transformation (i.e. converting to event time, or creating vectors of event "leads and lags"). This package is designed to remove this step, and allow researches with <span id="a2">[panel data](#f2 "Must be able to be tsset: read more")</span> to quickly and easily generate event study plots.  
+
+syntax is intentionally simple...  
+
+```stata
+esplot paygrade, by(male) event(to_male_mgr) window(-20 30)
+```
+
+![Example Figure](img/img1.svg "Example Figure")
+
+... but is also flexible enough to allow for a range of powerful specifications and customizations. 
+```stata
+esplot paygrade, by(male) event(to_male_mgr, replace save) compare(to_fem_mgr, replace save) absorb(idn i.male##i.monthn) window(-30 30) period_length(3) vce(cluster idn mgr_id) estimate_reference 
+```
+![Example Figure](img/img5.svg "Example Figure")
+
+All that we were <span id="a3">*[required](#fn3 "While not required, specifying a window is highly recommended.")*</span> to type is the dependent variable and an event dummy. For example:
+```stata
+esplot paygrade, event(to_male_mgr)
+```
+ `esplot` does the work behind the scenes to generate a full vector of event "lags" and "leads", so that the researcher can directly call `esplot` with minimal additional cleaning. While `by` is not explicitly required; easy comparison across groups however, is at the heart of many event studies.
+
+
+### Smoothing over time periods
+
+In our example, we have 51 time periods $t \in [-20,30]$; with confidence intervals and more than two groups these figures can get "crowded" fast! Additionally, pooling coefficients can increase power and tighten confidence intervals. A set of point estimates that are *individually* insignificant can often be *jointly* significant.
+
+The argument `period_length` takes an integer and allows users to smooth individual estimates over larger time periods. 
+
+For example, we could have instead typed 
+
+`esplot paygrade, by(male) event(to_male_mgr) window(-20 30) period_length(3)`  
+
+![Example Figure](img/img2a.svg "Example Figure")
+
+or
+
+`esplot paygrade, by(male) event(to_male_mgr) window(-24 30) period_length(12)` 
+
+![Example Figure](img/img2b.svg "Example Figure")
+
+Since the underlying time periods are months, when we set period length to $3$, we recover quarter level estimates. When we set period length to $12$, we recover <span id="a1"> [annual estimates](#f1 "esplot will trim extraneous periods: read more")</span>. 
+
+ **The estimate for $t=0$ is never smoothed, and is always only the event indicator,** i.e. exactly the estimate of the passed event indicator.
+
+
+### Confidence Interval and Estimate Display Options
+
+`esplot` has out of the box support for certain plot types for confidence intervals and for estimates.  
+
+### Creating custom plots
+
+
+ ```stata
+import delimited "training2.csv", clear
+
+**include replace in case we want to do this iteratively**
+ esplot paygrade, by(male) event(to_male_mgr) window(-20 30) period_length(12) savedata(event_study_coefs, replace)
+
+ use event_study_coefs, clear
+
+ /* custom plot code */
+ graph export custom_plot.svg, replace
+ ```  
+
+Further customization is available for more advanced users; the option `savedata(filename [, replace])` will cause the coefficents, 95% confidence intervals, standard errors of the estimates, as well as p-values to be saved to `event_study_coefs.dta` (`replace` allows `esplot` to save over the existing version of  `event_study_coefs.dta`, if it exists). This then allows the user to create their own plot from these estimates. It can also be useful for users who wish to report detailed estimates of coefficients or p-values in a particular time period when discussing an event study plot.
+
+### Coming Soon
+
+Even more fun things still to come! More graphical options; bounds on attrition...
+
+<!-- https://stackoverflow.com/questions/25579868/how-to-add-footnotes-to-github-flavoured-markdown -->
+<!-- <hr> -->
+<hr>
+
+[↩](#a2 "Back") <span id="f2">Since `esplot` relies on time series functions to track individuals over time, data must be `tsset` before calling `esplot`.</span>
+
+ [↩](#a3 "Back") <span id="f3"> The `window(numlist)` option tells `esplot` how many periods before and after the event it should try to plot. When the option is not specified, it will estimate an event window equal to twice the time span of the entire panel. This can cause runtime to be poor; especially in large datasets. In practice, there are often few or no observations near the endpoints of the panel (i.e. at event time $t=\pm T$), and so these time periods fall out. There is a still a runtime cost.
+ </span>
+
+
+ [↩](#a1 "Back") <span id="f1">Since $-20$ and $30$ are not evenly divisible by $3$, `esplot` effectively truncates the window to $[-18,30]$.</span>
+
+ 
