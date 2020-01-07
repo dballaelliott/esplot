@@ -18,9 +18,7 @@ While there are many approaches to creating event study plots, most require data
 
 syntax is intentionally simple...  
 
-```stata
-esplot paygrade, by(male) event(to_male_mgr) window(-20 30)
-```
+`esplot paygrade, by(male) event(to_male_mgr) window(-20 30)`
 
 ![Example Figure](img/img1.svg "Example Figure")
 
