@@ -39,7 +39,7 @@ esplot paygrade, event(to_male_mgr)
 
 ### Smoothing over time periods
 
-In our example, we have 51 time periods $t \in [-20,30]$; with confidence intervals and more than two groups these figures can get "crowded" fast! Additionally, pooling coefficients can increase power and tighten confidence intervals. A set of point estimates that are *individually* insignificant can often be *jointly* significant.
+In our example, we have 51 time periods t = [-20,30]; with confidence intervals and more than two groups these figures can get "crowded" fast! Additionally, pooling coefficients can increase power and tighten confidence intervals. A set of point estimates that are *individually* insignificant can often be *jointly* significant.
 
 The argument `period_length` takes an integer and allows users to smooth individual estimates over larger time periods. 
 
@@ -55,9 +55,9 @@ or
 
 ![Example Figure](img/img2b.svg "Example Figure")
 
-Since the underlying time periods are months, when we set period length to $3$, we recover quarter level estimates. When we set period length to $12$, we recover <span id="a1"> [annual estimates](#f1 "esplot will trim extraneous periods: read more")</span>. 
+Since the underlying time periods are months, when we set period length to 3, we recover quarter level estimates. When we set period length to 12, we recover <span id="a1"> [annual estimates](#f1 "esplot will trim extraneous periods: read more")</span>. 
 
- **The estimate for $t=0$ is never smoothed, and is always only the event indicator,** i.e. exactly the estimate of the passed event indicator.
+ **The estimate for t=0 is never smoothed, and is always only the event indicator,** i.e. exactly the estimate of the passed event indicator.
 
 
 ### Confidence Interval and Estimate Display Options
@@ -91,10 +91,10 @@ Even more fun things still to come! More graphical options; bounds on attrition.
 
 [↩](#a2 "Back") <span id="f2">Since `esplot` relies on time series functions to track individuals over time, data must be `tsset` before calling `esplot`.</span>
 
- [↩](#a3 "Back") <span id="f3"> The `window(numlist)` option tells `esplot` how many periods before and after the event it should try to plot. When the option is not specified, it will estimate an event window equal to twice the time span of the entire panel. This can cause runtime to be poor; especially in large datasets. In practice, there are often few or no observations near the endpoints of the panel (i.e. at event time $t=\pm T$), and so these time periods fall out. There is a still a runtime cost.
+ [↩](#a3 "Back") <span id="f3"> The `window(numlist)` option tells `esplot` how many periods before and after the event it should try to plot. When the option is not specified, it will estimate an event window equal to twice the time span of the entire panel. This can cause runtime to be poor; especially in large datasets. In practice, there are often few or no observations near the endpoints of the panel (i.e. at event time t= +/- T), and so these time periods fall out. There is a still a runtime cost.
  </span>
 
 
- [↩](#a1 "Back") <span id="f1">Since $-20$ and $30$ are not evenly divisible by $3$, `esplot` effectively truncates the window to $[-18,30]$.</span>
+ [↩](#a1 "Back") <span id="f1">Since -20 and 30 are not evenly divisible by 3, `esplot` effectively truncates the window to [-18,30].</span>
 
  
