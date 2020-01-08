@@ -47,13 +47,21 @@ The argument `period_length` takes an integer and allows users to smooth individ
 
 For example, we could have instead typed 
 
-`esplot paygrade, by(male) event(to_male_mgr) window(-20 30) period_length(3)`  
+```stata
+set scheme s1rcolor
+esplot paygrade, by(male) event(to_male_mgr) \\\
+window(-20 30) period_length(3)
+```  
 
 ![Example Figure](img/img2a.svg "Example Figure")
 
 or
 
-`esplot paygrade, by(male) event(to_male_mgr) window(-24 30) period_length(12)` 
+```stata
+set scheme s1color
+esplot paygrade, by(male) event(to_male_mgr) \\\
+window(-24 30) period_length(12)
+``` 
 
 ![Example Figure](img/img2b.svg "Example Figure")
 
@@ -61,6 +69,7 @@ Since the underlying time periods are months, when we set period length to 3, we
 
  **The estimate for t=0 is never smoothed, and is always only the event indicator,** i.e. exactly the estimate of the passed event indicator.
 
+As you may have inferred from the examples above, when the `colors` option is not specified, `esplot` defers to the settings of the current scheme.
 
 ### Confidence Interval and Estimate Display Options
 
