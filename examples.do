@@ -3,7 +3,9 @@ rename idn id
 encode id, gen(idn)
 
 
-cap: mkdir img 
+cap: mkdir docs
+cap: mkdir docs/img 
+
 global esplot_nolog 1
 
 /* LABEL */
