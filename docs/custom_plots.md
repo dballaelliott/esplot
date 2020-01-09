@@ -1,0 +1,3 @@
+# esplot: Custom Plot Types
+
+Example workflow and syntax using `savedata(filename)` coming soon... 
