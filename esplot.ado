@@ -363,9 +363,9 @@ foreach x of local by_groups{
 	}
 	// If we aren't estimating the reference category, then we add the zero 
 	if "`estimate_reference'" == "" {
-		mat b_`x' = (b_`x',0)
-		mat se_`x' = (se_`x',0)
-		mat p_`x' = (p_`x',0)
+		mat b_`x' = (b_`x',.)
+		mat se_`x' = (se_`x',.)
+		mat p_`x' = (p_`x',.)
 	}
 
 	//Add dot at event-time 0 
