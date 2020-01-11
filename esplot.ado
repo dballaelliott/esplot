@@ -525,8 +525,15 @@ foreach x of local by_groups{
 		label var p_`x' "P-Value"
 	}
 }
-if `make_legend' local twoway_option `", legend(order(`legend_info')) `options' "'
-else if "`*'" != "" local twoway_option ","
+if `make_legend' local legend_info = `"order(`legend_info')"'
+
+if "`legend'" != ""{
+	if strpos(`"`legend'"',"order") | strpos(`"`legend'"',"label") local legend_info `"`legend'"'
+	else local legend_options `"`legend'"'
+}
+
+if `"`legend_info'`legend_options'"' != "" local twoway_option `", legend(`legend_info' `legend_options') `options' "'
+else if "`options'" != "" local twoway_option ","
 
 `plot_command' `twoway_option' `options'
 
