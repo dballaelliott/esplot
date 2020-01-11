@@ -173,7 +173,7 @@ foreach ev of local ev_list{
 		if "`nogen_`ev''" == "" cap: gen L`i'_``ev'_name' = L`i'.``ev'_name' == 1
 		if _rc == 110{
 			local old_rc _rc
-			if "`replace_`ev''" == "replace" replace L`i'_``ev'_name' = L`i'.``ev'_name' == 1
+			if "`replace_`ev''" == "replace" $esplot_quietly replace L`i'_``ev'_name' = L`i'.``ev'_name' == 1
 			else {
 				di as error "variable  L`i'_``ev'_name' already defined."
 				di as text "Type ..." as input "`ev'(``ev'_name', replace)" as text "... if you'd like to overwrite existing lags/leads"
@@ -195,7 +195,7 @@ foreach ev of local ev_list{
 		if "`nogen_`ev''" == "" cap: gen F`j'_``ev'_name' = F`j'.``ev'_name' == 1
 		if _rc == 110{
 			local old_rc _rc
-			if "`replace_`ev''" == "replace" replace F`j'_``ev'_name' = F`j'.``ev'_name' == 1
+			if "`replace_`ev''" == "replace" $esplot_quietly replace F`j'_``ev'_name' = F`j'.``ev'_name' == 1
 			else {
 				di as error "variable F`j'_``ev'_name' already defined."
 				di as text "Type ..." as input "`ev'(``ev'_name', replace)" as text "... if you'd like to overwrite existing lags/leads"
@@ -216,8 +216,8 @@ foreach ev of local ev_list{
 	if _rc == 110{
 			local old_rc _rc
 			if "`replace_`ev''" == "replace"{
-				drop Lend_``ev'_name'
-				egen Lend_``ev'_name' = rowmax(`L_absorb')
+				$esplot_quietly drop Lend_``ev'_name'
+				$esplot_quietly egen Lend_``ev'_name' = rowmax(`L_absorb')
 			} 
 			else {
 				di as error "variable Lend_``ev'_name' already defined."
@@ -232,8 +232,8 @@ foreach ev of local ev_list{
 		if _rc == 110{
 			local old_rc _rc
 			if "`replace_`ev''" == "replace"{
-				drop Fend_``ev'_name'
-				egen Fend_``ev'_name' = rowmax(`F_absorb')
+				$esplot_quietly drop Fend_``ev'_name'
+				$esplot_quietly egen Fend_``ev'_name' = rowmax(`F_absorb')
 			} 
 			else {
 				di as error "variable Fend_``ev'_name' already defined."
@@ -312,7 +312,7 @@ syntax varlist(max=1), ///
 # delimit cr
 
 if "`by'" != ""{
-	su `by'
+	$esplot_quietly su `by'
 	local base_value "base_value(`r(min)')"
 }
 if "`by'" != "" local pass_by = "by(`by')"
