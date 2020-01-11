@@ -1,4 +1,4 @@
-/*! version alpha-1.0.1  7jan2020 Dylan Balla-Elliott, dballaelliott@hbs.edu */
+/*! version alpha-0.0.2  9jan2020 Dylan Balla-Elliott, dballaelliott@gmail.com */
 
 cap program drop esplot
 program define esplot, eclass sortpreserve
@@ -7,22 +7,23 @@ program define esplot, eclass sortpreserve
 version 14.1 
 
 #delimit ;
+/* TODO : make difference a by sub-option */
 syntax varlist(max=1) [if] [in] [fweight pweight aweight], ///
-	EVent(string) /// event(varname, save nogen)
+	EVent(string asis) /// event(varname, save nogen)
  	[ /// 
 	** GENERAL OPTIONS **
 	by(varname numeric) ///
-	compare(string) /// compare(varname, save nogen)
-	estimate_reference ///
+	compare(string asis) /// compare(varname, save nogen)
+	ESTimate_reference ///
 	difference ///
-	SAVEdata(string) ///
+	SAVEdata(string asis) ///
 	**START REGRESSION OPTIONS **
 	CONTROLs(varlist fv ts) absorb(passthru) vce(passthru) /// 
 
 	**START DISPLAY OPTIONS
 	Window(numlist max=2 min=2 integer ascending) ///
-	period_length(integer 1) /// 
-	colors(passthru) ///
+	PERIOD_length(integer 1) /// 
+	COLors(passthru) ///
 	est_plot(passthru) ci_plot(passthru) ///
 	legend(passthru) /// 
 	* ];
@@ -69,7 +70,7 @@ else global esplot_quietly
 
 if "`window'" != "" {
 	gettoken first_period last_period: (local) window
-	if `first_period' >= 0 di as test "Warning: No pre-period displayed. Try adjusting " as input "window"
+	if `first_period' >= 0 di as text "Warning: No pre-period displayed. Try adjusting " as input "window"
 }
 
 if "`absorb'" == "" local absorb "noabsorb"
@@ -306,7 +307,7 @@ syntax varlist(max=1), ///
 	period_length(integer 1) /// 
 	colors(namelist) ///
 	est_plot(name) ci_plot(name) ///
-	legend(string) * ///
+	legend(string asis) * ///
 	];
 # delimit cr
 
@@ -435,7 +436,6 @@ else local y_settings "ylabel(, format(`ylab_fmt') labsize(`label_size') angle(h
 $esplot_quietly ds, has(vallabel)
 if strpos("`r(varlist)'","`by'") & "`by'" != "" local make_legend 1
 else local make_legend 0
-
 
 /* Make the twoway logic */
 local plot_command "twoway"
