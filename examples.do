@@ -3,7 +3,9 @@ rename idn id
 encode id, gen(idn)
 
 
-cap: mkdir img 
+cap: mkdir docs 
+cap: mkdir docs/img 
+
 global esplot_nolog 1
 
 /* LABEL */
@@ -39,6 +41,7 @@ graph export img/img4.svg, replace
 
 esplot paygrade, by(male) event(to_male_mgr, nogen) compare(to_fem_mgr, nogen) absorb(idn i.male##i.monthn) window(-30 30) period_length(3) vce(cluster idn mgr_id) est_plot(line) ci_plot(rarea) colors(maroon navy)
 graph export img/img4a.svg, replace 
+graph export img/img4a.png, replace 
 
 /* through zero */
 log_program `" esplot paygrade, by(male) event(to_male_mgr, replace save) compare(to_fem_mgr, replace save) absorb(idn i.male##i.monthn) window(-30 30) period_length(3) vce(cluster idn mgr_id) estimate_reference "'
