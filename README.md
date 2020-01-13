@@ -14,4 +14,4 @@ Event study plots are increasingly popular in applied research. `esplot` is a ne
 
 See [site](https://dballaelliott.github.io/esplot) for introduction and overview. 
 
-*In Progress* : Type `help esplot` after installation for internal documentation.
+Type `help esplot` after installation for internal stata help documentation.
