@@ -39,9 +39,9 @@ graph export img/img3.svg, replace  */
 esplot paygrade, by(male) event(to_male_mgr, nogen) compare(to_fem_mgr, save) absorb(idn i.male##i.monthn) window(-30 30) period_length(3) vce(cluster idn mgr_id)
 graph export img/img4.svg, replace 
 
-esplot paygrade, by(male) event(to_male_mgr, nogen) compare(to_fem_mgr, nogen) absorb(idn i.male##i.monthn) window(-30 30) period_length(3) vce(cluster idn mgr_id) est_plot(line) ci_plot(rarea) colors(maroon navy)
-graph export img/img4a.svg, replace 
-graph export img/img4a.png, replace 
+esplot paygrade, by(male) event(to_male_mgr, nogen) compare(to_fem_mgr, nogen) absorb(idn i.male##i.monthn) window(-30 30) period_length(3) vce(cluster idn mgr_id) est_plot(line) ci_plot(rarea) colors(maroon navy) legend(nobox lwidth(none) region(color(none)) ring(0) position(11)) xtitle("Quarters") ytitle("Promotions")
+graph export img/header.png, replace width(1280) height(640)
+
 
 /* through zero */
 log_program `" esplot paygrade, by(male) event(to_male_mgr, replace save) compare(to_fem_mgr, replace save) absorb(idn i.male##i.monthn) window(-30 30) period_length(3) vce(cluster idn mgr_id) estimate_reference "'

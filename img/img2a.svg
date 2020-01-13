@@ -22,9 +22,6 @@
 	<line x1="1214.48" y1="2014.84" x2="1214.48" y2="1903.58" style="stroke:#808080;stroke-opacity:0.80;stroke-width:8.64"/>
 	<line x1="1192.45" y1="1903.58" x2="1236.51" y2="1903.58" stroke-linecap="round" style="stroke:#808080;stroke-opacity:0.80;stroke-width:8.64"/>
 	<line x1="1192.45" y1="2014.84" x2="1236.51" y2="2014.84" stroke-linecap="round" style="stroke:#808080;stroke-opacity:0.80;stroke-width:8.64"/>
-	<line x1="1429.68" y1="1474.90" x2="1429.68" y2="1474.90" style="stroke:#808080;stroke-opacity:0.80;stroke-width:8.64"/>
-	<line x1="1407.66" y1="1474.90" x2="1451.71" y2="1474.90" stroke-linecap="round" style="stroke:#808080;stroke-opacity:0.80;stroke-width:8.64"/>
-	<line x1="1407.66" y1="1474.90" x2="1451.71" y2="1474.90" stroke-linecap="round" style="stroke:#808080;stroke-opacity:0.80;stroke-width:8.64"/>
 	<line x1="1644.76" y1="2022.26" x2="1644.76" y2="1844.55" style="stroke:#808080;stroke-opacity:0.80;stroke-width:8.64"/>
 	<line x1="1622.73" y1="1844.55" x2="1666.79" y2="1844.55" stroke-linecap="round" style="stroke:#808080;stroke-opacity:0.80;stroke-width:8.64"/>
 	<line x1="1622.73" y1="2022.26" x2="1666.79" y2="2022.26" stroke-linecap="round" style="stroke:#808080;stroke-opacity:0.80;stroke-width:8.64"/>
@@ -68,8 +65,6 @@
 	<circle cx="999.40" cy="1986.00" r="22.03" style="fill:none;stroke:#555555;stroke-width:8.64"/>
 	<circle cx="1214.48" cy="1959.27" r="26.35" style="fill:#555555"/>
 	<circle cx="1214.48" cy="1959.27" r="22.03" style="fill:none;stroke:#555555;stroke-width:8.64"/>
-	<circle cx="1429.56" cy="1475.02" r="26.35" style="fill:#555555"/>
-	<circle cx="1429.56" cy="1475.02" r="22.03" style="fill:none;stroke:#555555;stroke-width:8.64"/>
 	<circle cx="1644.64" cy="1933.41" r="26.35" style="fill:#555555"/>
 	<circle cx="1644.64" cy="1933.41" r="22.03" style="fill:none;stroke:#555555;stroke-width:8.64"/>
 	<circle cx="1859.71" cy="1879.94" r="26.35" style="fill:#555555"/>
@@ -107,9 +102,6 @@
 	<line x1="1214.48" y1="1414.01" x2="1214.48" y2="1232.09" style="stroke:#BFBFBF;stroke-opacity:0.80;stroke-width:8.64"/>
 	<line x1="1192.45" y1="1232.09" x2="1236.51" y2="1232.09" stroke-linecap="round" style="stroke:#BFBFBF;stroke-opacity:0.80;stroke-width:8.64"/>
 	<line x1="1192.45" y1="1414.01" x2="1236.51" y2="1414.01" stroke-linecap="round" style="stroke:#BFBFBF;stroke-opacity:0.80;stroke-width:8.64"/>
-	<line x1="1429.68" y1="1474.90" x2="1429.68" y2="1474.90" style="stroke:#BFBFBF;stroke-opacity:0.80;stroke-width:8.64"/>
-	<line x1="1407.66" y1="1474.90" x2="1451.71" y2="1474.90" stroke-linecap="round" style="stroke:#BFBFBF;stroke-opacity:0.80;stroke-width:8.64"/>
-	<line x1="1407.66" y1="1474.90" x2="1451.71" y2="1474.90" stroke-linecap="round" style="stroke:#BFBFBF;stroke-opacity:0.80;stroke-width:8.64"/>
 	<line x1="1644.76" y1="1483.44" x2="1644.76" y2="1194.60" style="stroke:#BFBFBF;stroke-opacity:0.80;stroke-width:8.64"/>
 	<line x1="1622.73" y1="1194.60" x2="1666.79" y2="1194.60" stroke-linecap="round" style="stroke:#BFBFBF;stroke-opacity:0.80;stroke-width:8.64"/>
 	<line x1="1622.73" y1="1483.44" x2="1666.79" y2="1483.44" stroke-linecap="round" style="stroke:#BFBFBF;stroke-opacity:0.80;stroke-width:8.64"/>
@@ -153,8 +145,6 @@
 	<circle cx="999.40" cy="1250.41" r="22.03" style="fill:none;stroke:#AAAAAA;stroke-width:8.64"/>
 	<circle cx="1214.48" cy="1323.05" r="26.35" style="fill:#AAAAAA"/>
 	<circle cx="1214.48" cy="1323.05" r="22.03" style="fill:none;stroke:#AAAAAA;stroke-width:8.64"/>
-	<circle cx="1429.56" cy="1475.02" r="26.35" style="fill:#AAAAAA"/>
-	<circle cx="1429.56" cy="1475.02" r="22.03" style="fill:none;stroke:#AAAAAA;stroke-width:8.64"/>
 	<circle cx="1644.64" cy="1339.02" r="26.35" style="fill:#AAAAAA"/>
 	<circle cx="1644.64" cy="1339.02" r="22.03" style="fill:none;stroke:#AAAAAA;stroke-width:8.64"/>
 	<circle cx="1859.71" cy="1265.26" r="26.35" style="fill:#AAAAAA"/>
