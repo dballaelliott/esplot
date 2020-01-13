@@ -743,10 +743,6 @@ program check_omitted_events, rclass
 				global tot = $tot + 1
 
 				if _se[`1'] != 0 local q = `q' + 1
-				else {
-					di "smoothing over missing cell for `event'"
-					global n_missing = $n_missing + 1
-				}
 			}
 			macro shift
 		}

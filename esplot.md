@@ -79,25 +79,57 @@ what does __esplot__ do?
 
 More complicated options are discussed below.  
   
-### Normalizing with estimate_reference 
+### Relative Event-Study Coefficients with difference and compare
 
-fill in
+__esplot__ has two suboptions to estimate and "difference out" reference coefficients; __difference__ and __compare__: 
 
-### Relative Event-Study Coefficients with compare and difference
+> __difference__ plots all series relative to the base level of __by__. It is helpful here to consider an example; let __by__ be a dummy variable that is 1 when the individual is a female, 0 when it is a male. By default, passing this variable to __by__ will cause two series to be estimated: one set of coefficients for males, and one for females. However, perhaps we are mainly interested in the difference in response across genders. Then, we could select the __difference__ option. __esplot__ will then estimate the male and female coefficients, but will plot their difference (female - male) in every period. 
 
-fill in
+>NB: when a using a factor variable with more than two levels with __by__, stata treats the _lowest_ value as the base case. At this time, to change the reference category, it is neccessary to create a new variable where the desired reference category is the lowest value. In the above example, we would use an indicator variable for "is male" rather than one for "is female".
 
-### Event Indicator Sub-Options: save, replace, nogen
+> __compare__ takes an additional event dummy, and estimates the main event coefficients relative to this event. Here, it is also helpful to consider an example from [Cullen & Perez-Truglia, 2019](https://www.nber.org/papers/w26530). Cullen & Perez-Truglia use the quasi-random rotation of managers across units to identify the effects of manager gender on the career progression of male and female employees. For example, they consider the effect of switching from a female manager to male manager _relative_ to switching from a female manager to another female manager. This would be coded as __... event(to_male_manager) compare(to_female_manager)...__. By including the comparison event, the authors adjust for the effects of switching managers _per se_ and isolate the differences associated with the gender of the manager. 
 
-fill in
+> __compare__ and __difference__ can be used together. See [Cullen & Perez-Truglia, 2019](https://www.nber.org/papers/w26530) for an in depth discussion, examples, and econometric specification
 
-### est_opts and ci_opts
+### Efficiently Estimating Many Event-Study Plots: save, replace, nogen
 
-fill in
+__event__ (and __compare__) have the sub-options __save__, __nogen__, and __replace__, which are of primary use when estimating multiple specifications, or multiple outcomes. These options save, (and then subsequently read from the data in memory), event "lags and leads". The __replace__ example is provided for completeness, but should be used with caution, as it overwrites "lags and leads" saved in memory. By default, __esplot__ does not change the data in memory. 
 
-### Custom plots with savedata
+> __save__ saves event lags _L<t>_<event>_ (or _L<t>_<compare>_) and leads _F<t>_<event>_ (or _F<t>_<compare>_). This sub-option can be selected for either, or both __event__ and __compare__.
 
-fill in
+> __nogen__ tells __esplot__ that lags and leads of the above form are present in the data in memory (often as a result of selecting __save__ on an earlier run) and that it should use the lags and leads in memory. If lags and leads are present and __nogen__ (or __replace__ ) is not selected, __esplot__ will throw an error.
+
+> __replace__ tells __esplot__ that lags and leads are present in the data and that it should overwrite them. This option should be used with caution, especially when lags and leads are user defined. There are two primary use-cases for __replace__, most often used with __save__. 
+ 
+> - if an earlier __esplot__ call used __save__, and the __window__ is adjusted. This is because __esplot__ calculates lags and leads only up to the endpoints given in __window__. (Example 2)
+
+> - if an earlier __esplot__ call used __save__, and you now wish to use __estimate_reference__ (or vice versa). Since, __esplot__ only keeps the lags and leads that it needs, if __save__ is used without __estimate_reference__, then the necessary leads for the omitted periods will not be saved. (Example 3)
+
+#### Examples with save, replace, and nogen
+
+__Example 1__  
+/* event lags and leads are saved */  
+{cmd:. esplot paygrade, by(male) event(to_male_mgr, save) window(-20 30) estimate_reference}  
+/* esplot saves time by simply using the lags/leads from the previous call */  
+{cmd:. esplot ln_sal, by(male) event(to_male_mgr, nogen) window(-20 30) period_length(3)}  
+
+__Example 2__  
+/* event lags and leads are saved */  
+{cmd:. esplot paygrade, by(male) event(to_male_mgr, save) window(-20 30) period(3) estimate_reference}  
+/* esplot saves time by simply using the lags/leads from the previous call */  
+{cmd:. esplot ln_sal, by(male) event(to_male_mgr, nogen) window(-20 30) period_length(3)}  
+/*we wish to expand the window of the first plot. we tell esplot that it will find lags and leads in memory, but it can ignore and overwrite them */  
+{cmd:. esplot paygrade, by(male) event(to_male_mgr, replace) window(-40 60) period(6) estimate_reference}
+
+__Example 3__  
+/* event lags and leads are saved */  
+{cmd:. esplot paygrade, by(male) event(to_male_mgr, save) window(-20 30) period(3)}  
+/* esplot saves time by simply using the lags/leads from the previous call */  
+{cmd:. esplot ln_sal, by(male) event(to_male_mgr, nogen) window(-20 30) period_length(3)}  
+/* There are differences in levels between males and females; we would like both series to go through the origin at t = -1.
+we now want to use estimate_reference, 
+so we tell esplot that it will find lags and leads in memory, but it can ignore and overwrite them */  
+{cmd:. esplot paygrade, by(male) event(to_male_mgr, save) window(-20 30) period(3) estimate_reference}  
 
 ## Remarks
 
@@ -122,10 +154,31 @@ Functions
 
 ## Acknowledgements
 
-Link to Old Boy's Club paper, etc. 
+This package was developed as an extension of code written for  
+Cullen, Zoë B., and Ricardo Perez-Truglia. _The Old Boys' Club: Schmoozing and the Gender Gap._ No.[w26530](https://www.nber.org/papers/w26530). NBER, 2019.  
+in my capacity as a research assistant to the authors.  
+
+Katherine Fang and Jenna Anders made extensive contributions to early versions of the underlying code, which this package extends. Zoë Cullen and Ricardo Perez-Truglia guided development. Any remaining errors are mine.
+
+## Author 
+
+Dylan Balla-Elliott  
+Research Associate, Harvard Business School  
+dballaelliott@gmail.com  
+[github](https://github.com/dballaelliott) | [twitter](https://twitter.com/dballaelliott)
+
+## Additional Features
+
+Bug-fixes, feature requests, and general comments are welcome via email, or directly as issues on github.  
+
+I currently plan on adding support for :  
+    - bounds on attrition/sample selection (Lee, 2009) for single-event plots
+    - the extension of the above to "differenced" event-study plots as discussed in Cullen & Perez-Truglia (2019)
+    - additional plot options
+
+Extensions via forks/pull requests by github users are welcomed.  
 
 - - -
 
 This help file was dynamically produced by 
 [MarkDoc Literate Programming package](http://www.haghish.com/markdoc/) 
-
