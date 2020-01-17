@@ -98,6 +98,15 @@ Further customization is available for more advanced users; the option `savedata
 
 Even more fun things still to come! More graphical options; bounds on attrition...
 
+## Acknowledgements
+
+This package was developed as an extension of code written for  
+> [Cullen, Zoë B., and Ricardo Perez-Truglia. _The Old Boys' Club: Schmoozing and the Gender Gap._ No.w26530. NBER, 2019.](https://www.nber.org/papers/w26530)
+ 
+in my capacity as a research assistant to the authors.  
+
+Katherine Fang and Jenna Anders made extensive contributions to early versions of the underlying code, which this package extends. Zoë Cullen and Ricardo Perez-Truglia guided development. Any remaining errors are mine.
+
 <!-- https://stackoverflow.com/questions/25579868/how-to-add-footnotes-to-github-flavoured-markdown -->
 <!-- <hr> -->
 <hr>
