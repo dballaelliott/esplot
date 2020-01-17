@@ -64,6 +64,7 @@ set more off
 if "$esplot_nolog" == "" global esplot_nolog 1
 if $esplot_nolog == 1 global esplot_quietly "quietly :"
 else global esplot_quietly
+
 /*****************************************************
 		Initial checks and warnings
 *****************************************************/
@@ -159,6 +160,19 @@ if "`save_compare'`save_event'" == "savesave"{
 	local save_event saveLater
 }
 
+/*!  Add check that I can save the file if you want me to save it
+** want to throw the error now, not after everything has run */
+/* 	if "`replace'"=="" {
+		if `"`savegraph'"'!="" {
+			if regexm(`"`savegraph'"',"\.[a-zA-Z0-9]+$") confirm new file `"`savegraph'"'
+			else confirm new file `"`savegraph'.gph"'
+		}
+		if `"`savedata'"'!="" {
+			confirm new file `"`savedata'.csv"'
+			confirm new file `"`savedata'.do"'
+		}
+	}
+ */
 local lags 
 local leads 
 local L_absorb
@@ -458,7 +472,7 @@ foreach x of local by_groups{
 		local color_id `.__SCHEME.color.p`plot_id''
 	}
 	
-	
+	/* todo: let people pass whatever they want to ci and est opts, including suboptions */
 	if "`est_plot'" == "line"{
 		local b_to_plot `"line b_`x' x, lcolor(`color_id')"'
 	}
@@ -476,22 +490,16 @@ foreach x of local by_groups{
 		local legend_num = `plot_id'*3
 
 	}
-	else if "`ci_plot'" == "rarea"{
-		local ci_to_plot `" rarea lo_`x' hi_`x' x, fcolor(`color_id'%10) lcolor(`color_id'%80*.75) lpattern(dash) "'
-		local legend_num = `plot_id'*2
-	}
 	else if "`ci_plot'" == "rcap" | "`ci_plot'" == "" {
 		local ci_to_plot `"rcap lo_`x' hi_`x' x, lcolor(`color_id'%80*.75)"'
 		local legend_num = `plot_id'*2 
 	}
 	else {
-		di as error "Unsupported plot type for confidence intervals: `est_plot'. Using default"
-		local ci_to_plot `"rcap lo_`x' hi_`x' x, lcolor(`color_id'%80*.75)"'
+		if "`ci_plot'" != "rarea" di as text "Unsupported plot type for confidence intervals: " as input "`est_plot'" as text " . Using default"
+		local ci_to_plot `" rarea lo_`x' hi_`x' x, fcolor(`color_id'%30) lcolor(`color_id'%0) "'
 		local legend_num = `plot_id'*2 
 	}
 	
-
-	/* TODO add functionality to graph call */
 	//local new_plot "rarea lo_`x' hi_`x' x, fcolor(`.__SCHEME.color.p`plot_id''%10) lcolor(`.__SCHEME.color.p`plot_id''%80*.75) lpattern(dash) || line b_`x' x, lcolor(`.__SCHEME.color.p`plot_id'') "
 	local new_plot " `ci_to_plot' || `b_to_plot' "
 
@@ -525,6 +533,9 @@ foreach x of local by_groups{
 		label var p_`x' "P-Value"
 	}
 }
+/* todo: have option defaults that people can overwrite if they want. 
+in particular, by default should make sure there isn't unneccessary white space.
+this looks pretty dumb when used with rarea */
 if `make_legend' local legend_info = `"order(`legend_info')"'
 
 if "`legend'" != ""{
@@ -750,4 +761,3 @@ program check_omitted_events, rclass
 		return scalar N = `q'
 end
 
-include log_program.ado
