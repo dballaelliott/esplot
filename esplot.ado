@@ -462,7 +462,7 @@ local plot_id = 1
 local legend_info
 
 gr_setscheme
-//if "`colors'" == "" local colors "navy maroon dkorange emerald teal"
+
 foreach x of local by_groups{
 	if `plot_id' > 1{
 		local plot_command `"`plot_command' ||"' 
@@ -505,14 +505,15 @@ foreach x of local by_groups{
 		local legend_num = `plot_id'*2 
 	}
 	
-	//local new_plot "rarea lo_`x' hi_`x' x, fcolor(`.__SCHEME.color.p`plot_id''%10) lcolor(`.__SCHEME.color.p`plot_id''%80*.75) lpattern(dash) || line b_`x' x, lcolor(`.__SCHEME.color.p`plot_id'') "
 	local new_plot " `ci_to_plot' || `b_to_plot' "
 
 	local plot_command `"`plot_command' `new_plot'"'
 
 	local plot_id = `plot_id' + 1
 
-	if `make_legend' local legend_info `"`legend_info' `legend_num' "`:label (`by') `x'' " "'
+	if `make_legend' { 
+		local legend_info `"`legend_info' `legend_num' `:label (`by') `x''  "'
+	}
 	
 	if "`by'" != "" {
 		if "`:label (`by') `x''" != ""{
