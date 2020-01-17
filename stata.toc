@@ -1,3 +1,6 @@
 v 0-alpha
+
+d esplot
 d Dylan Balla-Elliott, Harvard Business School
-p esplot
+
+p esplot. event-study plots.
