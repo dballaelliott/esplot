@@ -1,4 +1,4 @@
-/*! version alpha-0.0.3  17jan2020 Dylan Balla-Elliott, dballaelliott@gmail.com */
+/*! version 0-alpha-3  17jan2020 Dylan Balla-Elliott, dballaelliott@gmail.com */
 
 cap program drop esplot
 program define esplot, eclass sortpreserve
