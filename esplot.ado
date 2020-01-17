@@ -762,4 +762,3 @@ program check_omitted_events, rclass
 		return scalar N = `q'
 end
 
-include log_program.ado
