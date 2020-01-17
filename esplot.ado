@@ -8,7 +8,7 @@ version 14.1
 
 #delimit ;
 /* TODO : make difference a by sub-option */
-syntax varlist(max=1) [if] [in] [fweight pweight aweight], ///
+syntax varlist(max=1) [if] [in] [fweight pweight aweight/], ///
 	EVent(string asis) /// event(varname, save nogen)
  	[ /// 
 	** GENERAL OPTIONS **
@@ -159,6 +159,11 @@ if "`save_compare'`save_event'" == "savesave"{
 	local save_compare saveLater
 	local save_event saveLater
 }
+/* prepare weights  */
+
+local reg_weights 
+if "`exp'" != "" & "`weight'" !="" local reg_weights "[`weight'=`exp']"
+else if "`exp'" != "" /* and weight is missing */ local reg_weights "[aw=`exp']"
 
 /*!  Add check that I can save the file if you want me to save it
 ** want to throw the error now, not after everything has run */
@@ -277,7 +282,7 @@ if "`save_compare'`save_event'" == "saveLatersaveLater" preserve
 cap: preserve
 assert _rc == 621
 
-$esplot_quietly reghdfe `varlist' `leads' `lags' `endpoints' `controls' `if' `in' `weight', `absorb' `vce'
+$esplot_quietly reghdfe `varlist' `leads' `lags' `endpoints' `controls' `if' `in' `reg_weights', `absorb' `vce'
 
 if $esplot_nolog{
 	ES_graph `varlist', event(`event_name') `pass_by' compare(`compare_name') `pass_window' /// 
@@ -760,4 +765,3 @@ program check_omitted_events, rclass
 
 		return scalar N = `q'
 end
-
