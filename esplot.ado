@@ -684,7 +684,6 @@ else { // **both of these varlists are non-empty
 	local base_pair "(`event_list')/`n_event' - (`ref_event_list')/`reference' - ((`comp_list')/`n_comp' - (`ref_comp_list')/`reference') "
 	if "`difference'" != "" local base_pair 0  //if difference ,just look at the interaction terms
 
-	/* !Make this quiet soon */
 	$esplot_quietly lincom `base_pair' `interaction'
 
 	mat b_`coef_id' = (b_`coef_id',r(estimate))
