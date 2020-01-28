@@ -6,7 +6,7 @@ Event study plots are increasingly popular in applied research. `esplot` is a ne
 
 1. Install from within stata
 
-   `net install esplot, from("https://raw.githubusercontent.com/dballaelliott/esplot/master/")`
+   `net install esplot, from("https://raw.githubusercontent.com/dballaelliott/esplot/pkg/")`
 
 2. Download/clone from github
 
