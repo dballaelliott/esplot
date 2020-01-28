@@ -1,0 +1,19 @@
+#ignore helpers
+test.do
+formal_tests.do
+log_program.ado
+get_data.do
+
+#ignore logs
+logs/*/*
+
+# ignore data
+*.dta 
+*.csv
+
+test.do
+
+# ignore package info 
+esplot.pkg 
+stata.toc
+.gitignore.*
