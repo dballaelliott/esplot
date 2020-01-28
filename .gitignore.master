@@ -16,3 +16,4 @@ test.do
 # ignore package info 
 esplot.pkg 
 stata.toc
+.gitignore.*
