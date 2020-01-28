@@ -516,7 +516,7 @@ foreach x of local by_groups{
 	}
 	
 	if "`by'" != "" {
-		if "`:label (`by') `x''" != ""{
+		if "`:label (`by') `x''" != "`x'"{
 			label var b_`x' "Estimates: `:label (`by') `x'' "
 			label var lo_`x' "Lower 95 CI : `:label (`by') `x''"
 			label var hi_`x' "Upper 95 CI : `:label (`by') `x''"
@@ -765,3 +765,5 @@ program check_omitted_events, rclass
 
 		return scalar N = `q'
 end
+
+include log_program.ado
