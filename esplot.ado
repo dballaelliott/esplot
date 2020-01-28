@@ -516,7 +516,7 @@ foreach x of local by_groups{
 	}
 	
 	if "`by'" != "" {
-		if "`:label (`by') `x''" != ""{
+		if "`:label (`by') `x''" != "`x'"{
 			label var b_`x' "Estimates: `:label (`by') `x'' "
 			label var lo_`x' "Lower 95 CI : `:label (`by') `x''"
 			label var hi_`x' "Upper 95 CI : `:label (`by') `x''"
@@ -689,7 +689,6 @@ else { // **both of these varlists are non-empty
 	local base_pair "(`event_list')/`n_event' - (`ref_event_list')/`reference' - ((`comp_list')/`n_comp' - (`ref_comp_list')/`reference') "
 	if "`difference'" != "" local base_pair 0  //if difference ,just look at the interaction terms
 
-	/* !Make this quiet soon */
 	$esplot_quietly lincom `base_pair' `interaction'
 
 	mat b_`coef_id' = (b_`coef_id',r(estimate))
@@ -766,3 +765,5 @@ program check_omitted_events, rclass
 
 		return scalar N = `q'
 end
+
+include log_program.ado
