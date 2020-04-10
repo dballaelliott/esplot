@@ -12,7 +12,7 @@ Event study plots are increasingly popular in applied research. `esplot` is a ne
 
 #### Examples 
 
-The `examples` folder contains a .do file and a .csv with example data. Users may find it useful to download the folder and run (or simply browse) `make_examples.do` for sample syntax. 
+The `example` folder contains a .do file and a .csv with example data. Users may find it useful to download the folder and run (or simply browse) `make_examples.do` for sample syntax. 
 
 These data can also be used to experiment with the examples provided on the help [site](https://dballaelliott.github.io/esplot). Note that `example.csv` uses the same variable names for ease of use, but that the values have been randomized, so plots may not align with the example images.
 
