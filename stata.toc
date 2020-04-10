@@ -1,4 +1,4 @@
-v 0-alpha-4
+v 0-alpha-5.0
 
 d binscatter module to generate binned scatterplots
 d Dylan Balla-Elliott, Harvard Business School
