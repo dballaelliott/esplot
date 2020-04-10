@@ -12,3 +12,6 @@ logs/*/*
 *.csv
 
 test.do
+
+# ignore gitignores
+.gitignore.*
