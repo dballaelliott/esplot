@@ -17,11 +17,6 @@ label values male male
 tsset idn monthn 
 
 /* through zero */
-/* global esplot_nolog 0
-
-log_program `" esplot paygrade, by(male) event(to_male_mgr) compare(to_fem_mgr) absorb(idn i.male##i.monthn) window(-30 30) period_length(3) vce(cluster idn mgr_id) estimate_reference "'
-graph export img/img5.svg, replace  */
-
 esplot paygrade, by(male) event(to_male_mgr, save) window(-20 30) estimate_reference
 graph export docs/img/img1.svg, replace 
 

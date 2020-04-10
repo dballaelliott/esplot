@@ -512,7 +512,7 @@ foreach x of local by_groups{
 	local plot_id = `plot_id' + 1
 
 	if `make_legend' { 
-		local legend_info `"`legend_info' `legend_num' `:label (`by') `x''  "'
+		local legend_info `"`legend_info' `legend_num' "`:label (`by') `x''"  "'
 	}
 	
 	if "`by'" != "" {
@@ -765,5 +765,3 @@ program check_omitted_events, rclass
 
 		return scalar N = `q'
 end
-
-include log_program.ado
