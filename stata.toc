@@ -1,0 +1,6 @@
+v 0-alpha-4
+
+d binscatter module to generate binned scatterplots
+d Dylan Balla-Elliott, Harvard Business School
+
+p esplot. event-study plots.
