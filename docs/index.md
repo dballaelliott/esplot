@@ -77,7 +77,7 @@ As you may have inferred from the examples above, when the `colors` option is no
 
 ### Creating custom plots
 
-Further customization is available for interested users; the option `savedata(filename [, replace])` will cause the coefficents, 95% confidence intervals, standard errors of the estimates, as well as p-values to be saved to `event_study_coefs.dta` (`replace` allows `esplot` to save over the existing version of  `event_study_coefs.dta`, if it exists). This then allows the user to create their own plot from these estimates. It can also be useful for users who wish to report detailed estimates of coefficients or p-values in a particular time period when discussing an event study plot.
+Further customization is available for interested users; the option `savedata(filename [, replace])` will cause the coefficents, 95% confidence intervals, standard errors of the estimates, as well as p-values to be saved to `filename.dta` (`replace` allows `esplot` to save over the existing version of  `filename.dta`, if it exists). This then allows the user to create their own plot from these estimates. It can also be useful for users who wish to report detailed estimates of coefficients or p-values in a particular time period when discussing an event study plot.
 
  ```stata
 import delimited "training2.csv", clear
