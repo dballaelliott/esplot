@@ -517,26 +517,26 @@ foreach x of local by_groups{
 	
 	if "`by'" != "" {
 		if "`:label (`by') `x''" != "`x'"{
-			label var b_`x' "Estimates: `:label (`by') `x'' "
+			label var b_`x'1 "Estimates: `:label (`by') `x'' "
 			label var lo_`x' "Lower 95 CI : `:label (`by') `x''"
 			label var hi_`x' "Upper 95 CI : `:label (`by') `x''"
-			label var se_`x' "Estimate SE : `:label (`by') `x''"
-			label var p_`x' "P-Value : `:label (`by') `x''"
+			label var se_`x'1 "Estimate SE : `:label (`by') `x''"
+			label var p_`x'1 "P-Value : `:label (`by') `x''"
 		}
 		else{
-			label var b_`x' "Estimates: `by' == `x'  "
+			label var b_`x'1 "Estimates: `by' == `x'  "
 			label var lo_`x' "Lower 95 CI : `by' == `x' "
 			label var hi_`x' "Upper 95 CI : `by' == `x' "
-			label var se_`x' "Estimate SE : `by' == `x' "
-			label var p_`x' "P-Value : `by' == `x' "
+			label var se_`x'1 "Estimate SE : `by' == `x' "
+			label var p_`x'1 "P-Value : `by' == `x' "
 		} 
 	}
 	else{
-		label var b_`x' "Estimates"
+		label var b_`x'1 "Estimates"
 		label var lo_`x' "Lower 95 CI"
 		label var hi_`x' "Upper 95 CI"
-		label var se_`x' "Estimate SE"
-		label var p_`x' "P-Value"
+		label var se_`x'1 "Estimate SE"
+		label var p_`x'1 "P-Value"
 	}
 }
 /* todo: have option defaults that people can overwrite if they want. 
