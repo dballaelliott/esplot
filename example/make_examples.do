@@ -1,4 +1,10 @@
 discard 
+/* do ../esplot.ado */
+
+adopath ++ ".."
+net install allston, from("https://raw.githubusercontent.com/dballaelliott/allston/master/")
+
+set scheme aurora
 
 import delimited "example.csv", clear
 /* rename id id */
@@ -21,11 +27,9 @@ tsset id month
 esplot paygrade, by(male) event(to_male_mgr, save) window(-20 30) estimate_reference
 graph export ../docs/img/img1.svg, replace 
 
-set scheme s1rcolor
 esplot paygrade, by(male) event(to_male_mgr, nogen) window(-20 30) period_length(3)
 graph export ../docs/img/img2a.svg, replace 
 
-set scheme s1color
 esplot paygrade, by(male) event(to_male_mgr, nogen) window(-24 30) period_length(12)
 graph export ../docs/img/img2b.svg, replace 
 
