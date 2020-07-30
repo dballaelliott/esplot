@@ -1,4 +1,4 @@
-*! v 0.9.10 6apr2021 Dylan Balla-Elliott, dballaelliott@gmail.com *
+*! v 0.9.11 5may2021 Dylan Balla-Elliott, dballaelliott@gmail.com *
 
 /* 
 MIT License:
@@ -416,7 +416,7 @@ syntax varlist(max=1), ///
 	**START DISPLAY OPTIONS *
 	window(numlist max=2 min=2 integer ascending) ///
 	period_length(integer 1) /// 
-	colors(namelist) ///
+	colors(string asis) ///
 	est_plot(name) ci_plot(name) ///
 	legend(string asis) * ///
 	];
@@ -619,7 +619,7 @@ foreach x of local by_groups{
 	if "`color_id'" == "" {
 		if "`colors'" != "" di as error "No color found for plot `plot_id'; using default."
 
-		local color_id `.__SCHEME.color.p`plot_id''
+		local color_id "`.__SCHEME.color.p`plot_id''"
 	}
 	
 	/* todo: let people pass whatever they want to ci and est opts, including suboptions */
