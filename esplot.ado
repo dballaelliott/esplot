@@ -1,10 +1,9 @@
-/*! version 0-alpha-4  17jan2020 Dylan Balla-Elliott, dballaelliott@gmail.com */
+/*! version 0-alpha-6  3nov2020 Dylan Balla-Elliott, dballaelliott@gmail.com */
 
-cap program drop esplot
 program define esplot, eclass sortpreserve
 
 
-version 14.1 
+version 11
 
 #delimit ;
 /* TODO : make difference a by sub-option */
@@ -474,34 +473,34 @@ foreach x of local by_groups{
 	if "`color_id'" == "" {
 		if "`colors'" != "" di as error "No color found for plot `plot_id'; using default."
 
-		local color_id `.__SCHEME.color.p`plot_id''
+		local color_id "`.__SCHEME.color.p`plot_id''"
 	}
 	
 	/* todo: let people pass whatever they want to ci and est opts, including suboptions */
 	if "`est_plot'" == "line"{
-		local b_to_plot `"line b_`x' x, lcolor(`color_id')"'
+		local b_to_plot `"line b_`x' x, lcolor("`color_id'")"'
 	}
 	else if "`est_plot'" == "scatter" | "`est_plot'" == "" {
-		local b_to_plot `"scatter b_`x' x, mcolor(`color_id')"'
+		local b_to_plot `"scatter b_`x' x, mcolor("`color_id'")"'
 	}
 	else {
 		di as error "Unsupported plot type for estimates: `est_plot'. Using default"
-		local b_to_plot `"scatter b_`x' x, mcolor(`color_id')"'
+		local b_to_plot `"scatter b_`x' x, mcolor("`color_id'")"'
 	}
 
 
 	if "`ci_plot'" == "line"{
-		local ci_to_plot `"line lo_`x' hi_`x' x, lcolor(`color_id'%80*.75 `color_id'%80*.75)"' // lpattern(dash)
+		local ci_to_plot `"line lo_`x' hi_`x' x, lcolor("`color_id'%80*.75" "`color_id'%80*.75")"' // lpattern(dash)
 		local legend_num = `plot_id'*3
 
 	}
 	else if "`ci_plot'" == "rcap" | "`ci_plot'" == "" {
-		local ci_to_plot `"rcap lo_`x' hi_`x' x, lcolor(`color_id'%80*.75)"'
+		local ci_to_plot `"rcap lo_`x' hi_`x' x, lcolor("`color_id'%80*.75")"'
 		local legend_num = `plot_id'*2 
 	}
 	else {
 		if "`ci_plot'" != "rarea" di as text "Unsupported plot type for confidence intervals: " as input "`est_plot'" as text " . Using default"
-		local ci_to_plot `" rarea lo_`x' hi_`x' x, fcolor(`color_id'%30) lcolor(`color_id'%0) "'
+		local ci_to_plot `" rarea lo_`x' hi_`x' x, fcolor("`color_id'%30") lcolor("`color_id'%0") "'
 		local legend_num = `plot_id'*2 
 	}
 	
@@ -539,6 +538,7 @@ foreach x of local by_groups{
 		label var p_`x'1 "P-Value"
 	}
 }
+
 /* todo: have option defaults that people can overwrite if they want. 
 in particular, by default should make sure there isn't unneccessary white space.
 this looks pretty dumb when used with rarea */
@@ -551,6 +551,7 @@ if "`legend'" != ""{
 
 if `"`legend_info'`legend_options'"' != "" local twoway_option `", legend(`legend_info' `legend_options') `options' "'
 else if "`options'" != "" local twoway_option ","
+
 
 `plot_command' `twoway_option' `options'
 
