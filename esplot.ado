@@ -1,9 +1,9 @@
-/*! version 0-alpha-4  17jan2020 Dylan Balla-Elliott, dballaelliott@gmail.com */
+/*! version 0-alpha-5  17jan2020 Dylan Balla-Elliott, dballaelliott@gmail.com */
 
 program define esplot, eclass sortpreserve
 
 
-version 14.1 
+version 11
 
 #delimit ;
 /* TODO : make difference a by sub-option */
@@ -538,6 +538,7 @@ foreach x of local by_groups{
 		label var p_`x' "P-Value"
 	}
 }
+
 /* todo: have option defaults that people can overwrite if they want. 
 in particular, by default should make sure there isn't unneccessary white space.
 this looks pretty dumb when used with rarea */
@@ -550,6 +551,7 @@ if "`legend'" != ""{
 
 if `"`legend_info'`legend_options'"' != "" local twoway_option `", legend(`legend_info' `legend_options') `options' "'
 else if "`options'" != "" local twoway_option ","
+
 
 `plot_command' `twoway_option' `options'
 

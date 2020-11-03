@@ -18,3 +18,4 @@ test.do
 # ignore package info 
 esplot.pkg 
 stata.toc
+.vscode/settings.json

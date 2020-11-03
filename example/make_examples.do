@@ -22,7 +22,7 @@ cap: mkdir ../docs/img
 /* label values male male */
 
 tsset id month 
-
+version 12
 /* through zero */
 esplot paygrade, by(male) event(to_male_mgr, save) window(-20 30) estimate_reference
 graph export ../docs/img/img1.svg, replace 
@@ -52,5 +52,5 @@ esplot paygrade, by(male) event(to_male_mgr, replace save) compare(to_fem_mgr, r
 graph export ../docs/img/img5.svg, replace 
 
 
-esplot paygrade, by(male) event(to_male_mgr, nogen) compare(to_fem_mgr, nogen) window(-30 30) period_length(3) vce(cluster id mgr_id) estimate_reference
+esplot paygrade, by(male) event(to_male_mgr, nogen) compare(to_fem_mgr, nogen) window(-30 30) period_length(3) vce(cluster id mgr_id) estimate_reference xtitle("Event Time (Quarters)")
 graph export ../docs/img/img5a.svg, replace 
