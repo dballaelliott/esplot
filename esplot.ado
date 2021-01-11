@@ -24,48 +24,47 @@ syntax varlist(max=2) [if] [in] [fweight pweight aweight/], ///
 	COLors(passthru) ///
 	est_plot(passthru) ci_plot(passthru) ///
 	legend(passthru) /// 
+	save_sample(name) /// 
+
+	** quantile regression ** 
+	Quantile(real -1) ///
 	* ];
 # delimit cr
 
-set more off
-/* V1.0 options
-[SYMmetric /// 
-	graph_both ///
-	triple_dif ///
-	NO_reg ///
-	event_type(string) ///
- 	absorb(varlist fv ts) ///
-	CONTROLs(varlist fv ts) ///
-	cluster(varlist) ///
- 	Quarters(integer 10) ///
-	p_length(integer 3) ///
-	yrange(numlist) ///
-	tag(string) ///
-	label_size(string) ///
-	ylab_fmt(string) ///
- 	t_col(string) ///
-	c_col(string) ///
-	filetype(string) ///
-	event_suffix(string) ///
-	nodd ///
-	one_line ///
- 	NODROP ///
-	mgr_time ///
-	graph_all ///
-	force ///
-	animate ///
-	///
-	horserace ///
- */
-/* TODO: Think about how to remove window, and by */
-
 if "$esplot_nolog" == "" global esplot_nolog 1
 if $esplot_nolog == 1 global esplot_quietly "quietly :"
+
+if "$esplot_quietly" == "" global esplot_quietly "quietly :"
 else global esplot_quietly
+
 
 /*****************************************************
 		Initial checks and warnings
 *****************************************************/
+/* process quantile regression */
+if `quantile' == -1 {
+	local regression reghdfe
+} 
+else if `quantile' >= 100 | `quantile' <= 0{
+	di as error "`quantile' is not a valid quantile; try .5 for median regression."
+	exit 198  
+}
+else if `quantile' >= 1{
+	local q = `quantile'/100
+	local regression bsqreg
+}
+else {
+	local q = `quantile'
+	local regression bsqreg
+}
+
+if !missing("`save_sample'"){
+	/* if it is a variable this is a problem */
+	/* this will exit with an error */
+	gen `save_sample' = .
+	qui: ds
+	local save_sample_vars_to_keep = r(varlist)
+} 
 /* pull out outcome */
 local y: word 1 of `varlist'
 local e_t: word 2 of `varlist'
@@ -133,8 +132,6 @@ foreach arg in 1 2 3{
 			di as error "``arg'' not a valid sub-option of " as input "event"
 			exit
 		}
-		//di `"|``arg''_event| == |'``arg''_event'| "'
-
 	}
 }
 }
@@ -185,19 +182,6 @@ local reg_weights
 if "`exp'" != "" & "`weight'" !="" local reg_weights "[`weight'=`exp']"
 else if "`exp'" != "" /* and weight is missing */ local reg_weights "[aw=`exp']"
 
-/*!  Add check that I can save the file if you want me to save it
-** want to throw the error now, not after everything has run */
-/* 	if "`replace'"=="" {
-		if `"`savegraph'"'!="" {
-			if regexm(`"`savegraph'"',"\.[a-zA-Z0-9]+$") confirm new file `"`savegraph'"'
-			else confirm new file `"`savegraph'.gph"'
-		}
-		if `"`savedata'"'!="" {
-			confirm new file `"`savedata'.csv"'
-			confirm new file `"`savedata'.do"'
-		}
-	}
- */
 local lags 
 local leads 
 local L_absorb
@@ -256,41 +240,6 @@ foreach ev of local ev_list{
 		else local F_absorb " `F_absorb' F`j'_``ev'_name'"
 	}
 
-** I think the correct way is to estimate all coefficients and not absorb endpoints
-
-	/* if "`nogen_`ev''" == "" & "`window'" != "" cap: egen Lend_``ev'_name' = rowmax(`L_absorb')
-	if _rc == 110{
-			local old_rc _rc
-			if "`replace_`ev''" == "replace"{
-				$esplot_quietly drop Lend_``ev'_name'
-				$esplot_quietly egen Lend_``ev'_name' = rowmax(`L_absorb')
-			} 
-			else {
-				di as error "variable Lend_``ev'_name' already defined."
-				di as text "Type ..." as input "`ev'(``ev'_name', replace)" as text "... if you'd like to overwrite existing lags/leads"
-				di as text "Type ..." as input "`ev'(``ev'_name', nogen)" as text "... if you'd like to use the lags/leads in memory"
-				error `old_rc'
-			}
-		}
-		else error _rc  */
-
-** I think the correct way is to estimate all coefficients and not absorb endpoints
-	/* if "`nogen_`ev''" == ""  & "`window'" != "" cap: egen Fend_``ev'_name' = rowmax(`F_absorb')
-		if _rc == 110{
-			local old_rc _rc
-			if "`replace_`ev''" == "replace"{
-				$esplot_quietly drop Fend_``ev'_name'
-				$esplot_quietly egen Fend_``ev'_name' = rowmax(`F_absorb')
-			} 
-			else {
-				di as error "variable Fend_``ev'_name' already defined."
-				di as text "Type ..." as input "`ev'(``ev'_name', replace)" as text "... if you'd like to overwrite existing lags/leads"
-				di as text "Type ..." as input "`ev'(``ev'_name', nogen)" as text "... if you'd like to use the lags/leads in memory"
-				error `old_rc'
-			}
-		}
-		else error _rc  */
-
 	
 	if "`by'" == "" local endpoints "`endpoints' `F_absorb' `L_absorb'"
 	else local endpoints "`endpoints' i.`by'#(`F_absorb' `L_absorb')"
@@ -323,8 +272,8 @@ else{
 }
 
 if "`savedata'" != ""{
-	keep x lo_* hi_* b_* p_* se_*
-	rename x t 
+	keep $ESPLOT_TIME_VAR lo_* hi_* b_* p_* se_*
+	rename $ESPLOT_TIME_VAR t 
 	if `period_length' > 1 label var t "Time (averaging over `period_length' periods)"
 	else label var t "Time"
 	/* see if replace is specified */
@@ -334,6 +283,11 @@ if "`savedata'" != ""{
 }
 restore 
 
+if !missing("`save_sample'"){
+	use `sample_info', clear 
+
+	keep `save_sample_vars_to_keep'
+}
 end
 
 
@@ -445,7 +399,10 @@ $esplot_quietly drop in 1 //drop the initial 0 in all the matrices
 
 local periods = floor(abs(`first_period')/`period_length') + floor(`last_period'/`period_length') + 1
 *x values
-$esplot_quietly gen x = _n - abs(floor(`first_period'/`period_length')) - 1 if _n <= `periods' 
+tempvar t 
+global ESPLOT_TIME_VAR `t'
+$esplot_quietly gen `t' = _n - abs(floor(`first_period'/`period_length')) - 1 if _n <= `periods' 
+label variable `t' "event time"
 
 foreach x of local by_groups{
 	$esplot_quietly gen lo_`x' = b_`x'1 - se_`x'1*1.96
@@ -453,7 +410,7 @@ foreach x of local by_groups{
 }
 
 //matlist b_0 b_1 
-if "$esplot_quietly" == "" list x lo_* hi_* b_* in 1/`periods'
+if "$esplot_quietly" == "" list `t' lo_* hi_* b_* in 1/`periods'
 
 if "`force'" != "" & "`yrange'" != ""{
 	tokenize `yrange'
