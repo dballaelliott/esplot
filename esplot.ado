@@ -1,14 +1,13 @@
-/*! version 0-alpha-6  3nov2020 Dylan Balla-Elliott, dballaelliott@gmail.com */
+/*! v 0.7.1 25nov2020 Dylan Balla-Elliott, dballaelliott@gmail.com */
 
 program define esplot, eclass sortpreserve
-
 
 version 11
 
 #delimit ;
 /* TODO : make difference a by sub-option */
-syntax varlist(max=1) [if] [in] [fweight pweight aweight/], ///
-	EVent(string asis) /// event(varname, save nogen)
+syntax varlist(max=2) [if] [in] [fweight pweight aweight/], ///
+	[EVent(string asis)] /// event(varname, save nogen)
  	[ /// 
 	** GENERAL OPTIONS **
 	by(varname numeric) ///
@@ -67,6 +66,16 @@ else global esplot_quietly
 /*****************************************************
 		Initial checks and warnings
 *****************************************************/
+/* pull out outcome */
+local y: word 1 of `varlist'
+local e_t: word 2 of `varlist'
+
+if `:word count `varlist'' == 2 & !missing("`event'`compare'") {
+	di as error "Compare and Event indicators not compatible with existing event time variable."
+	di  "Try either" as input "esplot y, event(<event_indicator>)" as text "or" as input "esplot y <event_time>"
+	exit 
+}
+
 
 if "`window'" != "" {
 	gettoken first_period last_period: (local) window
@@ -75,13 +84,25 @@ if "`window'" != "" {
 
 if "`absorb'" == "" local absorb "noabsorb"
 
-$esplot_quietly tsset 
-local id `r(panelvar)'
-local max_delta = `r(tmax)' - `r(tmin)'
+if missing("`e_t'"){
+	$esplot_quietly tsset 
+	local id `r(panelvar)'
+	local max_delta = `r(tmax)' - `r(tmin)'
 
-if "`window'" == ""{
-	local first_period = -`max_delta'
-	local last_period = `max_delta'
+	if "`window'" == ""{
+		local first_period = -`max_delta'
+		local last_period = `max_delta'
+	}
+}
+else {
+	qui: su `e_t'
+
+	local max_delta = max(abs(r(min)),r(max))
+
+	if "`window'" == ""{
+		local first_period = r(min)
+		local last_period = r(max)
+	}
 }
 
 if "`estimate_reference'" != "" local omitted_threshold = - 1
@@ -183,12 +204,16 @@ local L_absorb
 local F_absorb
 local endpoints
 
+local e_t_name `e_t' 
+if !missing("`e_t'") local ev_list "e_t"
+
 foreach ev of local ev_list{
 	//if "`nogen_`ev''" == "nogen" continue
 	if "``ev'_name'" == "" continue
 	// Make event lags..
 	forvalues i = 0/`max_delta'{
-		if "`nogen_`ev''" == "" cap: gen L`i'_``ev'_name' = L`i'.``ev'_name' == 1
+		if !missing("`e_t'") gen L`i'_``ev'_name' = `e_t' == `i'
+		else if "`nogen_`ev''" == "" cap: gen L`i'_``ev'_name' = L`i'.``ev'_name' == 1
 		if _rc == 110{
 			local old_rc _rc
 			if "`replace_`ev''" == "replace" $esplot_quietly replace L`i'_``ev'_name' = L`i'.``ev'_name' == 1
@@ -199,7 +224,7 @@ foreach ev of local ev_list{
 				error `old_rc'
 			}
 		}
-		else error _rc 
+		/* else error _rc  */
 
 		if `i' <= `last_period'{
 			if "`by'" == "" local lags "`lags' L`i'_``ev'_name'" 
@@ -210,7 +235,8 @@ foreach ev of local ev_list{
 	// .. and event leads
 	forvalues i = -`max_delta'/`omitted_threshold'{
 		local j = abs(`i')
-		if "`nogen_`ev''" == "" cap: gen F`j'_``ev'_name' = F`j'.``ev'_name' == 1
+		if !missing("`e_t'") gen F`j'_``ev'_name'  = `e_t' == -`j'
+		else if "`nogen_`ev''" == "" cap: gen F`j'_``ev'_name' = F`j'.``ev'_name' == 1
 		if _rc == 110{
 			local old_rc _rc
 			if "`replace_`ev''" == "replace" $esplot_quietly replace F`j'_``ev'_name' = F`j'.``ev'_name' == 1
@@ -221,7 +247,7 @@ foreach ev of local ev_list{
 				error `old_rc'
 			}
 		}
-		else error _rc 
+		/* else error _rc  */
 
 		if `i' >= `first_period'{
 			if "`by'" == "" local leads "`leads' F`j'_``ev'_name'"
@@ -230,7 +256,9 @@ foreach ev of local ev_list{
 		else local F_absorb " `F_absorb' F`j'_``ev'_name'"
 	}
 
-	if "`nogen_`ev''" == "" & "`window'" != "" cap: egen Lend_``ev'_name' = rowmax(`L_absorb')
+** I think the correct way is to estimate all coefficients and not absorb endpoints
+
+	/* if "`nogen_`ev''" == "" & "`window'" != "" cap: egen Lend_``ev'_name' = rowmax(`L_absorb')
 	if _rc == 110{
 			local old_rc _rc
 			if "`replace_`ev''" == "replace"{
@@ -244,9 +272,10 @@ foreach ev of local ev_list{
 				error `old_rc'
 			}
 		}
-		else error _rc 
+		else error _rc  */
 
-	if "`nogen_`ev''" == ""  & "`window'" != "" cap: egen Fend_``ev'_name' = rowmax(`F_absorb')
+** I think the correct way is to estimate all coefficients and not absorb endpoints
+	/* if "`nogen_`ev''" == ""  & "`window'" != "" cap: egen Fend_``ev'_name' = rowmax(`F_absorb')
 		if _rc == 110{
 			local old_rc _rc
 			if "`replace_`ev''" == "replace"{
@@ -260,12 +289,12 @@ foreach ev of local ev_list{
 				error `old_rc'
 			}
 		}
-		else error _rc 
+		else error _rc  */
 
-	if "`window'" != "" {
-		if "`by'" == "" local endpoints "`endpoints' Lend_``ev'_name' Fend_``ev'_name'"
-		else local endpoints "`endpoints' Lend_``ev'_name' Fend_``ev'_name' i.`by'#c.Lend_``ev'_name' i.`by'#c.Fend_``ev'_name' "
-	}
+	
+	if "`by'" == "" local endpoints "`endpoints' `F_absorb' `L_absorb'"
+	else local endpoints "`endpoints' i.`by'#(`F_absorb' `L_absorb')"
+	
 	/* just save if we said to save, not to save later 
 		(this is because if both passed save, it'll try to preserve twice,
 		so we switch to "saveLater" if both pass save)
@@ -281,14 +310,16 @@ if "`save_compare'`save_event'" == "saveLatersaveLater" preserve
 cap: preserve
 assert _rc == 621
 
-$esplot_quietly reghdfe `varlist' `leads' `lags' `endpoints' `controls' `if' `in' `reg_weights', `absorb' `vce'
+$esplot_quietly reghdfe `y' `leads' `lags' `endpoints' `controls' `if' `in' `reg_weights', `absorb' `vce'
 
+/* if we have event time, then that's our event */
+local event_name "`e_t'"
 if $esplot_nolog{
-	ES_graph `varlist', event(`event_name') `pass_by' compare(`compare_name') `pass_window' /// 
+	ES_graph `y', event(`event_name') `pass_by' compare(`compare_name') `pass_window' /// 
 	`estimate_reference' `difference' period_length(`period_length') `colors' `est_plot' `ci_plot' `legend' `options'
 }
 else{
-	log_program `"ES_graph `varlist', event(`event_name') `pass_by' compare(`compare_name') `pass_window' `estimate_reference' `difference' period_length(`period_length') `colors' `est_plot' `ci_plot' `legend' `options' "'
+	log_program `"ES_graph `y', event(`event_name') `pass_by' compare(`compare_name') `pass_window' `estimate_reference' `difference' period_length(`period_length') `colors' `est_plot' `ci_plot' `legend' `options' "'
 }
 
 if "`savedata'" != ""{
