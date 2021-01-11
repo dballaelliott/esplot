@@ -320,8 +320,7 @@ if "`by'" != ""{
 }
 if "`by'" != "" local pass_by = "by(`by')"
 
-/* TODO WRITE EXTRACT ARG 
-takes in a pass thru arg of the form varname(arg) and returns "arg" */
+/* takes in a pass thru arg of the form varname(arg) and returns "arg" */
 
 gettoken first_period last_period: (local) window
 
@@ -461,34 +460,34 @@ foreach x of local by_groups{
 	if "`color_id'" == "" {
 		if "`colors'" != "" di as error "No color found for plot `plot_id'; using default."
 
-		local color_id "`.__SCHEME.color.p`plot_id''"
+		local color_id `.__SCHEME.color.p`plot_id''
 	}
 	
 	/* todo: let people pass whatever they want to ci and est opts, including suboptions */
 	if "`est_plot'" == "line"{
-		local b_to_plot `"line b_`x' x, lcolor("`color_id'")"'
+		local b_to_plot `"line b_`x' `t', lcolor(`"`color_id'"')"'
 	}
 	else if "`est_plot'" == "scatter" | "`est_plot'" == "" {
-		local b_to_plot `"scatter b_`x' x, mcolor("`color_id'")"'
+		local b_to_plot `"scatter b_`x' `t', mcolor(`"`color_id'"')"'
 	}
 	else {
 		di as error "Unsupported plot type for estimates: `est_plot'. Using default"
-		local b_to_plot `"scatter b_`x' x, mcolor("`color_id'")"'
+		local b_to_plot `"scatter b_`x' `t', mcolor(`"`color_id'"')"'
 	}
 
 
 	if "`ci_plot'" == "line"{
-		local ci_to_plot `"line lo_`x' hi_`x' x, lcolor("`color_id'%80*.75" "`color_id'%80*.75")"' // lpattern(dash)
+		local ci_to_plot `"line lo_`x' hi_`x' `t', lcolor(`"`color_id'%80*.75"' `"`color_id'%80*.75"')"' // lpattern(dash)
 		local legend_num = `plot_id'*3
 
 	}
 	else if "`ci_plot'" == "rcap" | "`ci_plot'" == "" {
-		local ci_to_plot `"rcap lo_`x' hi_`x' x, lcolor("`color_id'%80*.75")"'
+		local ci_to_plot `"rcap lo_`x' hi_`x' `t', lcolor(`"`color_id'%80*.75"')"'
 		local legend_num = `plot_id'*2 
 	}
 	else {
 		if "`ci_plot'" != "rarea" di as text "Unsupported plot type for confidence intervals: " as input "`est_plot'" as text " . Using default"
-		local ci_to_plot `" rarea lo_`x' hi_`x' x, fcolor("`color_id'%30") lcolor("`color_id'%0") "'
+		local ci_to_plot `" rarea lo_`x' hi_`x' `t', fcolor(`"`color_id'%30"') lcolor(`"`color_id'%0"') "'
 		local legend_num = `plot_id'*2 
 	}
 	
@@ -687,20 +686,20 @@ else { // **both of these varlists are non-empty
 
 end
 
-
+/* 
 capture program drop saveCoefs
 program saveCoefs
 	syntax namelist, [symmetric triple_dif nodd as(string)] 
 
 	local coefs `namelist'
 
-	drop if missing(x)
+	drop if missing(t)
 
 	tempfile to_write 
 	save `to_write', replace 
 
 	foreach x of local coefs {
-		keep x lo_`x' hi_`x' b_`x' se_`x' p_`x'
+		keep t lo_`x' hi_`x' b_`x' se_`x' p_`x'
 		
 		rename *_`x'? *
 		rename *_`x' *
@@ -712,7 +711,7 @@ program saveCoefs
 
 		gen estimate = "`x_0'"
 		
-		rename x quarter 
+		rename t quarter 
 
 		tempfile new_estimate 
 		save `new_estimate', replace 
@@ -729,7 +728,7 @@ program saveCoefs
 		export delimited "$out_dir/coefs/`as'.csv", replace 
 		use `to_write', clear 
 	}
-end 
+end  */
 
 
 capture program drop check_omitted_events
