@@ -58,6 +58,30 @@ else {
 	local regression bsqreg
 }
 
+/* parse FE for quantile regression */
+if !missing("`absorb'") local main_absorb `absorb'
+else local main_absorb "noabsorb"
+
+if `quantile' != -1 & !missing("`absorb'"){
+	local qreg_fe
+	local 0 , `absorb'
+
+	/* extract the varlist */
+	syntax , absorb(varlist fv ts)
+		local absorb_vars `absorb'
+		
+		foreach var of local `absorb_vars'{
+			local fe_var: subinstr local var "i." "", all 
+
+			tempvar FE 
+			egen `FE' = group(`fe_var')
+
+			local qreg_fe `qreg_fe' `FE'
+		}
+	
+
+}
+
 if !missing("`save_sample'"){
 	/* if it is a variable this is a problem */
 	/* this will exit with an error */
@@ -80,8 +104,6 @@ if "`window'" != "" {
 	gettoken first_period last_period: (local) window
 	if `first_period' >= 0 di as text "Warning: No pre-period displayed. Try adjusting " as input "window"
 }
-
-if "`absorb'" == "" local absorb "noabsorb"
 
 if missing("`e_t'"){
 	$esplot_quietly tsset 
@@ -107,9 +129,6 @@ else {
 if "`estimate_reference'" != "" local omitted_threshold = - 1
 else local omitted_threshold = - `period_length' - 1
 
-/* foreach var in "by" "window"{
-	if "``var''" != "" local pass_`var' = "`var'(``var'')"
-} */
 if "`by'" != "" local pass_by = "by(`by')"
 local pass_window = "window(`first_period' `last_period')"
 
@@ -117,8 +136,8 @@ if "`by'" == "" & "`difference'" != ""{
 	di as error "Error:" as input "by" as error "is required to use" as input "difference"
 	exit 
 }
-/* PARSE EVENT AND COMPARE */
 
+/* PARSE EVENT AND COMPARE */
 tokenize `: subinstr local event "," "|" ', parse("|")
 local event_name `1'
 if "`3'" != ""{
@@ -259,16 +278,28 @@ if "`save_compare'`save_event'" == "saveLatersaveLater" preserve
 cap: preserve
 assert _rc == 621
 
-$esplot_quietly reghdfe `y' `leads' `lags' `endpoints' `controls' `if' `in' `reg_weights', `absorb' `vce'
+if "`regression'" == "reghdfe"{
+	$esplot_quietly reghdfe `y' `leads' `lags' `endpoints' `controls' `if' `in' `reg_weights', `main_absorb' `vce'
+}
+else if "`regression'" == "qreg"{
+	if !missing("`vce'") di "Warning: option `vce' ignored with quantile regression"
+	$esplot_quietly bsqreg `y' `leads' `lags' `endpoints' `controls' `qreg_fe' `if' `in' `reg_weights',  quantile(`q')
+}
+if !missing("`save_sample'"){
+	/* confirm we can make the variable */
+	replace `save_sample' = e(sample)
+	tempfile sample_info
+	save `sample_info', replace 
+}
 
 /* if we have event time, then that's our event */
 local event_name "`e_t'"
 if $esplot_nolog{
 	ES_graph `y', event(`event_name') `pass_by' compare(`compare_name') `pass_window' /// 
-	`estimate_reference' `difference' period_length(`period_length') `colors' `est_plot' `ci_plot' `legend' `options'
+	`estimate_reference' `difference' period_length(`period_length') `colors' `est_plot' `ci_plot' `legend' `wildcard_options'
 }
 else{
-	log_program `"ES_graph `y', event(`event_name') `pass_by' compare(`compare_name') `pass_window' `estimate_reference' `difference' period_length(`period_length') `colors' `est_plot' `ci_plot' `legend' `options' "'
+	log_program `"ES_graph `y', event(`event_name') `pass_by' compare(`compare_name') `pass_window' `estimate_reference' `difference' period_length(`period_length') `colors' `est_plot' `ci_plot' `legend' `wildcard_options' "'
 }
 
 if "`savedata'" != ""{
