@@ -37,6 +37,7 @@ if $esplot_nolog == 1 global esplot_quietly "quietly :"
 if "$esplot_quietly" == "" global esplot_quietly "quietly :"
 else global esplot_quietly
 
+local wildcard_options `options'
 
 /*****************************************************
 		Initial checks and warnings
@@ -389,10 +390,10 @@ foreach x of local by_groups{
 	forvalues t = `first_period'(`period_length')`omitted_threshold'{
 		local j = abs(`t')
 		if $esplot_nolog{
-			lincom_quarter, lead event(`event') `base_value' `pass_by' `compare' `estimate_reference' `difference' coef_id(`x') time(`j') period_length(`period_length')
+			aggregate_periods, lead event(`event') `base_value' `pass_by' `compare' `estimate_reference' `difference' coef_id(`x') time(`j') period_length(`period_length')
 		}
 		else{
-			log_program `"lincom_quarter, lead event(`event') `base_value' `pass_by' `compare' `estimate_reference' `difference' coef_id(`x') time(`j') period_length(`period_length')"'
+			log_program `"aggregate_periods, lead event(`event') `base_value' `pass_by' `compare' `estimate_reference' `difference' coef_id(`x') time(`j') period_length(`period_length')"'
 		}
 	}
 	// If we aren't estimating the reference category, then we add the zero 
@@ -406,7 +407,7 @@ foreach x of local by_groups{
 	lincom_quarter, lag event(`event') `base_value' `pass_by' `compare' `estimate_reference' `difference' coef_id(`x') time(0)
 
 	forvalues t = `period_length'(`period_length')`last_period'{
-		lincom_quarter, lag event(`event') `base_value' `pass_by' `compare' `estimate_reference' `difference' coef_id(`x') time(`t') period_length(`period_length')
+		aggregate_periods, lag event(`event') `base_value' `pass_by' `compare' `estimate_reference' `difference' coef_id(`x') time(`t') period_length(`period_length')
 	}
 	//Add post-period coefficients
 	** transpose all the matrices
@@ -578,8 +579,8 @@ else if "`options'" != "" local twoway_option ","
 end
 
 
-capture program drop lincom_quarter
-program lincom_quarter
+capture program drop aggregate_periods
+program aggregate_periods
 
 #delimit ;
 syntax , ///
@@ -609,13 +610,13 @@ triple_dif SYMmetric ev_tag(string) NODROP reference(int 3)]
 local i = `time'
 
 if "`lead'" != "" & "`lag'" != "" {
-	di as error "Please select either lag or lead, not both in lincom_quarter"
+	di as error "Please select either lag or lead, not both in aggregate_periods"
 	exit 198
 }
 else if "`lead'" != "" local t "F"
 else if "`lag'" != "" local t "L"
 else { // both are missing
-	di as error "Please select either lag or lead in lincom_quarter"
+	di as error "Please select either lag or lead in aggregate_periods"
 	exit 198
 }
 
