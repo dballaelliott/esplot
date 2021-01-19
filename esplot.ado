@@ -1,4 +1,4 @@
-/*! v 0.7.1 25nov2020 Dylan Balla-Elliott, dballaelliott@gmail.com */
+/*! v 0.8.2 11jan2020 Dylan Balla-Elliott, dballaelliott@gmail.com */
 
 program define esplot, eclass sortpreserve
 
@@ -15,6 +15,7 @@ syntax varlist(max=2) [if] [in] [fweight pweight aweight/], ///
 	ESTimate_reference ///
 	difference ///
 	SAVEdata(string asis) ///
+	
 	**START REGRESSION OPTIONS **
 	CONTROLs(varlist fv ts) absorb(passthru) vce(passthru) /// 
 
@@ -349,6 +350,7 @@ syntax varlist(max=1), ///
 if "`by'" != ""{
 	$esplot_quietly su `by'
 	local base_value "base_value(`r(min)')"
+	local base_value_id `r(min)'
 }
 if "`by'" != "" local pass_by = "by(`by')"
 
@@ -378,10 +380,17 @@ To(string) From(string) by(varname) ///
  filetype(string) tag(string) ev_tag(string) nodd NODROP mgr_time force animate estimate_reference]
  */
 
-if "`by'" == "" local by_groups = 0
-else qui: levelsof `by', local(by_groups)
+if "`by'" == "" local raw_by_groups = 0
+else qui: levelsof `by', local(raw_by_groups)
+
+if !missing("`by'") & !missing("`difference'") local by_groups : list raw_by_groups - base_value_id 
+else local by_groups `raw_by_groups'
 
 foreach x of local by_groups{
+
+	/* skip the base case when plotting differences  */
+	/* if !missing("`difference'") & `x' == `base_value_id' continue */
+	
 	mat b_`x' = 0
 	mat se_`x' = 0
 	mat p_`x' = 0
@@ -404,7 +413,7 @@ foreach x of local by_groups{
 	}
 
 	//Add dot at event-time 0 
-	lincom_quarter, lag event(`event') `base_value' `pass_by' `compare' `estimate_reference' `difference' coef_id(`x') time(0)
+	aggregate_periods, lag event(`event') `base_value' `pass_by' `compare' `estimate_reference' `difference' coef_id(`x') time(0)
 
 	forvalues t = `period_length'(`period_length')`last_period'{
 		aggregate_periods, lag event(`event') `base_value' `pass_by' `compare' `estimate_reference' `difference' coef_id(`x') time(`t') period_length(`period_length')
@@ -436,6 +445,7 @@ $esplot_quietly gen `t' = _n - abs(floor(`first_period'/`period_length')) - 1 if
 label variable `t' "event time"
 
 foreach x of local by_groups{
+	
 	$esplot_quietly gen lo_`x' = b_`x'1 - se_`x'1*1.96
 	$esplot_quietly gen hi_`x' = b_`x'1 + se_`x'1*1.96
 }
@@ -563,7 +573,7 @@ in particular, by default should make sure there isn't unneccessary white space.
 this looks pretty dumb when used with rarea */
 if `make_legend' local legend_info = `"order(`legend_info')"'
 
-if "`legend'" != ""{
+if !missing(`"`legend'"') {
 	if strpos(`"`legend'"',"order") | strpos(`"`legend'"',"label") local legend_info `"`legend'"'
 	else local legend_options `"`legend'"'
 }
@@ -717,6 +727,7 @@ else { // **both of these varlists are non-empty
 }
 
 end
+
 
 /* 
 capture program drop saveCoefs
