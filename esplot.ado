@@ -580,11 +580,11 @@ if !missing(`"`legend'"') {
 	else local legend_options `"`legend'"'
 }
 
-if `"`legend_info'`legend_options'"' != "" local twoway_option `", legend(`legend_info' `legend_options') `options' "'
-else if "`options'" != "" local twoway_option ","
+if !missing(`"`legend_info'`legend_options'"') local twoway_option `" legend(`legend_info' `legend_options') `options' "'
+else if !missing(`"`options'"') local twoway_option `" `options'"'
 
 
-`plot_command' `twoway_option' `options'
+`plot_command' `twoway_option' 
 
 //saveCoefs `coefs', as(`varlist'_`from'2`to'`tag') `triple_dif' `symmetric' `dd'
 
