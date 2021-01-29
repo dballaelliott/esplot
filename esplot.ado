@@ -65,21 +65,28 @@ if !missing("`absorb'") local main_absorb `absorb'
 else local main_absorb "noabsorb"
 
 if `quantile' != -1 & !missing("`absorb'"){
-	local qreg_fe
-	local 0 , `absorb'
 
-	/* extract the varlist */
-	syntax , absorb(varlist fv ts)
-		local absorb_vars `absorb'
+	local absorb_var: subinstr local absorb "absorb(" ""
+	local absorb_var: subinstr local absorb_var ")" ""
+	extract_varlist `absorb_var'
 		
-		foreach var of local `absorb_vars'{
+	local qreg_fe = r(varlist)
+/* 
+	foreach var of local absorb_var {
 			local fe_var: subinstr local var "i." "", all 
+
+		** if there's a bunch of stuff interacted, need to get rid of the extra stuff 
+		local fe_var: subinstr local fe_var "#" " ", all 
+		local fe_var: subinstr local fe_var "(" " ", all 
+		local fe_var: subinstr local fe_var ")" " ", all 
+		forval num = 0/9{
+			local fe_var: subinstr local fe_var "" " ", all 
+		} 
 
 			tempvar FE 
 			egen `FE' = group(`fe_var')
-
 			local qreg_fe `qreg_fe' `FE'
-		}
+	} */
 	
 
 }
@@ -283,7 +290,7 @@ assert _rc == 621
 if "`regression'" == "reghdfe"{
 	$esplot_quietly reghdfe `y' `leads' `lags' `endpoints' `controls' `if' `in' `reg_weights', `main_absorb' `vce'
 }
-else if "`regression'" == "qreg"{
+else if "`regression'" == "bsqreg"{
 	if !missing("`vce'") di "Warning: option `vce' ignored with quantile regression"
 	$esplot_quietly bsqreg `y' `leads' `lags' `endpoints' `controls' `qreg_fe' `if' `in' `reg_weights',  quantile(`q')
 }
@@ -387,10 +394,6 @@ if !missing("`by'") & !missing("`difference'") local by_groups : list raw_by_gro
 else local by_groups `raw_by_groups'
 
 foreach x of local by_groups{
-
-	/* skip the base case when plotting differences  */
-	/* if !missing("`difference'") & `x' == `base_value_id' continue */
-	
 	mat b_`x' = 0
 	mat se_`x' = 0
 	mat p_`x' = 0
@@ -445,7 +448,6 @@ $esplot_quietly gen `t' = _n - abs(floor(`first_period'/`period_length')) - 1 if
 label variable `t' "event time"
 
 foreach x of local by_groups{
-	
 	$esplot_quietly gen lo_`x' = b_`x'1 - se_`x'1*1.96
 	$esplot_quietly gen hi_`x' = b_`x'1 + se_`x'1*1.96
 }
@@ -728,7 +730,12 @@ else { // **both of these varlists are non-empty
 
 end
 
+program extract_varlist, rclass 
+syntax varlist(fv ts)
 
+return local varlist `"`varlist'"' 
+
+end 
 /* 
 capture program drop saveCoefs
 program saveCoefs
