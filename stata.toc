@@ -1,4 +1,4 @@
-v 0.9.6
+v 0.9.7
 
 d esplot: event study plots.
 d Dylan Balla-Elliott, Harvard Business School

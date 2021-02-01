@@ -1,4 +1,4 @@
-/*! v 0.9.6 9mar2021 Dylan Balla-Elliott, dballaelliott@gmail.com */
+/*! v 0.9.7 9mar2021 Dylan Balla-Elliott, dballaelliott@gmail.com */
 
 /* 
 MIT License:
@@ -58,6 +58,8 @@ syntax varlist(max=2) [if] [in] [fweight pweight aweight/], ///
 	Quantile(real -1) ///
 	* ];
 # delimit cr
+
+set more off
 
 if "$esplot_nolog" == "" global esplot_nolog 1
 
@@ -603,14 +605,14 @@ foreach x of local by_groups{
 	
 	/* todo: let people pass whatever they want to ci and est opts, including suboptions */
 	if "`est_plot'" == "line"{
-    local b_to_plot `"line b_`x' `t', lcolor(`"`color_id'"')"'
+		local b_to_plot `"line b_`x'1 `t', lcolor("`color_id'")"'
 	}
 	else if "`est_plot'" == "scatter" | "`est_plot'" == "" {
-		local b_to_plot `"scatter b_`x' `t', mcolor(`"`color_id'"')"'
+		local b_to_plot `"scatter b_`x'1 `t', mcolor("`color_id'")"'
 	}
 	else {
 		di as error "Unsupported plot type for estimates: `est_plot'. Using default"
-		local b_to_plot `"scatter b_`x' `t', mcolor(`"`color_id'"')"'
+		local b_to_plot `"scatter b_`x'1 `t', mcolor("`color_id'")"'
 	}
 
 
