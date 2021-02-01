@@ -1,4 +1,4 @@
-/*! v 0.8.4 29jan2021 Dylan Balla-Elliott, dballaelliott@gmail.com */
+/*! v 0.8.5 1feb2021 Dylan Balla-Elliott, dballaelliott@gmail.com */
 
 program define esplot, eclass sortpreserve
 
@@ -88,7 +88,7 @@ local e_t: word 2 of `varlist'
 
 if `:word count `varlist'' == 2 & !missing("`event'`compare'") {
 	di as error "Compare and Event indicators not compatible with existing event time variable."
-	di  "Try either" as input "esplot y, event(<event_indicator>)" as text "or" as input "esplot y <event_time>"
+	di as text "Try either " as input "esplot y, event(<event_indicator>)" as text "or " as input "esplot y <event_time> [, options]  "
 	exit 
 }
 
@@ -286,7 +286,7 @@ if !missing("`save_sample'"){
 }
 
 /* if we have event time, then that's our event */
-local event_name "`e_t'"
+if !missing("`e_t'") local event_name "`e_t'"
 if $esplot_nolog{
 	ES_graph `y', event(`event_name') `pass_by' compare(`compare_name') `pass_window' /// 
 	`estimate_reference' `difference' period_length(`period_length') `colors' `est_plot' `ci_plot' `legend' `wildcard_options'

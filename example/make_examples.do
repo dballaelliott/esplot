@@ -1,7 +1,7 @@
 discard 
 /* do ../esplot.ado */
 
-adopath ++ ".."
+adopath ++ "../"
 net install allston, from("https://raw.githubusercontent.com/dballaelliott/allston/master/")
 
 set scheme aurora
