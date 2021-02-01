@@ -9,17 +9,17 @@ version 11
 syntax varlist(max=2) [if] [in] [fweight pweight aweight/], ///
 	[EVent(string asis)] /// event(varname, save nogen)
  	[ /// 
-	** GENERAL OPTIONS **
+	/** GENERAL OPTIONS **/
 	by(varname numeric) ///
 	compare(string asis) /// compare(varname, save nogen)
 	ESTimate_reference ///
 	difference ///
 	SAVEdata(string asis) ///
 	
-	**START REGRESSION OPTIONS **
+	/** START REGRESSION OPTIONS **/
 	CONTROLs(varlist fv ts) absorb(passthru) vce(passthru) /// 
 
-	**START DISPLAY OPTIONS
+	/**START DISPLAY OPTIONS */
 	Window(numlist max=2 min=2 integer ascending) ///
 	PERIOD_length(integer 1) /// 
 	COLors(passthru) ///
@@ -27,7 +27,7 @@ syntax varlist(max=2) [if] [in] [fweight pweight aweight/], ///
 	legend(passthru) /// 
 	save_sample(name) /// 
 
-	** quantile regression ** 
+	/** quantile regression **/
 	Quantile(real -1) ///
 	* ];
 # delimit cr
@@ -71,23 +71,7 @@ if `quantile' != -1 & !missing("`absorb'"){
 	extract_varlist `absorb_var'
 		
 	local qreg_fe = r(varlist)
-/* 
-	foreach var of local absorb_var {
-			local fe_var: subinstr local var "i." "", all 
 
-		** if there's a bunch of stuff interacted, need to get rid of the extra stuff 
-		local fe_var: subinstr local fe_var "#" " ", all 
-		local fe_var: subinstr local fe_var "(" " ", all 
-		local fe_var: subinstr local fe_var ")" " ", all 
-		forval num = 0/9{
-			local fe_var: subinstr local fe_var "" " ", all 
-		} 
-
-			tempvar FE 
-			egen `FE' = group(`fe_var')
-			local qreg_fe `qreg_fe' `FE'
-	} */
-	
 
 }
 
@@ -448,6 +432,7 @@ $esplot_quietly gen `t' = _n - abs(floor(`first_period'/`period_length')) - 1 if
 label variable `t' "event time"
 
 foreach x of local by_groups{
+	
 	$esplot_quietly gen lo_`x' = b_`x'1 - se_`x'1*1.96
 	$esplot_quietly gen hi_`x' = b_`x'1 + se_`x'1*1.96
 }
@@ -736,49 +721,6 @@ syntax varlist(fv ts)
 return local varlist `"`varlist'"' 
 
 end 
-/* 
-capture program drop saveCoefs
-program saveCoefs
-	syntax namelist, [symmetric triple_dif nodd as(string)] 
-
-	local coefs `namelist'
-
-	drop if missing(t)
-
-	tempfile to_write 
-	save `to_write', replace 
-
-	foreach x of local coefs {
-		keep t lo_`x' hi_`x' b_`x' se_`x' p_`x'
-		
-		rename *_`x'? *
-		rename *_`x' *
-
-		local x_0 "`x'"
-		if "`triple_dif'" != ""  local x_0 "DDD"
-		if "`symmetric'" != "" local x_0  "Sym. DDD"
-		if "`dd'" == "nodd" local x_0 "`x'_noDD"
-
-		gen estimate = "`x_0'"
-		
-		rename t quarter 
-
-		tempfile new_estimate 
-		save `new_estimate', replace 
-
-		cap: mkdir "$out_dir/coefs"
-		cap: import delimited "$out_dir/coefs/`as'.csv", clear
-		if _rc == 0 {
-			drop if estimate == "`x_0'"
-			append using `new_estimate'
-		}
-		
-		order estimate quarter b p lo hi se 
-
-		export delimited "$out_dir/coefs/`as'.csv", replace 
-		use `to_write', clear 
-	}
-end  */
 
 
 capture program drop check_omitted_events
