@@ -34,9 +34,7 @@ This would allow `esplot` to be used in a repeated cross-section or other non-pa
 
 #### Known Bugs
 
-The error code `variable b_0 not found` is thrown when [variable abbreviation is disabled](https://github.com/dballaelliott/esplot/issues/6). 
-
-This is now properly labeled a bug, since this violates coding best practices; I am implementing a hotfix before the v1.0 update. 
+The error code `variable b_0 not found` is thrown when [variable abbreviation is disabled]. **The bug is fixed as of `esplot` 0.8.5 (Feb 1/2021).**
 
 ### For users of older versions of Stata
 
