@@ -32,6 +32,12 @@ can have multiple events or if there are multiple *types* of events that the res
 I am working on adding support to more general settings. **I am currently adding support for settings in which the researcher has already defined a `event time` variable.**
 This would allow `esplot` to be used in a repeated cross-section or other non-panel settings. 
 
+#### Known Bugs
+
+The error code `variable b_0 not found` is thrown when [variable abbreviation is disabled](https://github.com/dballaelliott/esplot/issues/6). 
+
+This is now properly labeled a bug, since this violates coding best practices; I am implementing a hotfix before the v1.0 update. 
+
 ### For users of older versions of Stata
 
 Currently, this project nominally supports Stata versions as early as 11.
