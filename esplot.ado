@@ -1,7 +1,6 @@
-/*! version 0-alpha-6  3nov2020 Dylan Balla-Elliott, dballaelliott@gmail.com */
+/*! version 0.8.5  1feb2021 Dylan Balla-Elliott, dballaelliott@gmail.com */
 
 program define esplot, eclass sortpreserve
-
 
 version 11
 
@@ -29,36 +28,6 @@ syntax varlist(max=1) [if] [in] [fweight pweight aweight/], ///
 # delimit cr
 
 set more off
-/* V1.0 options
-[SYMmetric /// 
-	graph_both ///
-	triple_dif ///
-	NO_reg ///
-	event_type(string) ///
- 	absorb(varlist fv ts) ///
-	CONTROLs(varlist fv ts) ///
-	cluster(varlist) ///
- 	Quarters(integer 10) ///
-	p_length(integer 3) ///
-	yrange(numlist) ///
-	tag(string) ///
-	label_size(string) ///
-	ylab_fmt(string) ///
- 	t_col(string) ///
-	c_col(string) ///
-	filetype(string) ///
-	event_suffix(string) ///
-	nodd ///
-	one_line ///
- 	NODROP ///
-	mgr_time ///
-	graph_all ///
-	force ///
-	animate ///
-	///
-	horserace ///
- */
-/* TODO: Think about how to remove window, and by */
 
 if "$esplot_nolog" == "" global esplot_nolog 1
 if $esplot_nolog == 1 global esplot_quietly "quietly :"
@@ -478,14 +447,14 @@ foreach x of local by_groups{
 	
 	/* todo: let people pass whatever they want to ci and est opts, including suboptions */
 	if "`est_plot'" == "line"{
-		local b_to_plot `"line b_`x' x, lcolor("`color_id'")"'
+		local b_to_plot `"line b_`x'1 x, lcolor("`color_id'")"'
 	}
 	else if "`est_plot'" == "scatter" | "`est_plot'" == "" {
-		local b_to_plot `"scatter b_`x' x, mcolor("`color_id'")"'
+		local b_to_plot `"scatter b_`x'1 x, mcolor("`color_id'")"'
 	}
 	else {
 		di as error "Unsupported plot type for estimates: `est_plot'. Using default"
-		local b_to_plot `"scatter b_`x' x, mcolor("`color_id'")"'
+		local b_to_plot `"scatter b_`x'1 x, mcolor("`color_id'")"'
 	}
 
 
