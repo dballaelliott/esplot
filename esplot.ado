@@ -34,8 +34,6 @@ syntax varlist(max=2) [if] [in] [fweight pweight aweight/], ///
 
 if "$esplot_nolog" == "" global esplot_nolog 1
 if $esplot_nolog == 1 global esplot_quietly "quietly :"
-
-if "$esplot_quietly" == "" global esplot_quietly "quietly :"
 else global esplot_quietly
 
 local wildcard_options `options'
