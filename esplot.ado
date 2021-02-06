@@ -1,4 +1,4 @@
-/*! v 0.8.5 1feb2021 Dylan Balla-Elliott, dballaelliott@gmail.com */
+/*! v 0.8.6 1feb2021 Dylan Balla-Elliott, dballaelliott@gmail.com */
 
 program define esplot, eclass sortpreserve
 
@@ -15,7 +15,8 @@ syntax varlist(max=2) [if] [in] [fweight pweight aweight/], ///
 	ESTimate_reference ///
 	difference ///
 	SAVEdata(string asis) ///
-	
+	save_sample(name) /// 
+
 	/** START REGRESSION OPTIONS **/
 	CONTROLs(varlist fv ts) absorb(passthru) vce(passthru) /// 
 
@@ -25,7 +26,6 @@ syntax varlist(max=2) [if] [in] [fweight pweight aweight/], ///
 	COLors(passthru) ///
 	est_plot(passthru) ci_plot(passthru) ///
 	legend(passthru) /// 
-	save_sample(name) /// 
 
 	/** quantile regression **/
 	Quantile(real -1) ///
