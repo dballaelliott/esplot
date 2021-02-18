@@ -1,84 +1,82 @@
 {smcl}
-{it:v 0.7.1}
+{it:version alpha-1}
 
 {title:esplot {hline 2} event study plots}
 
 {title:Syntax}
 
 {p 8 8 2} {bf:esplot} varname [{it:if}] [{it:in}]
-[{it:weight}], {ul:ev}ent({it:varname [, suboptions ]}) [  {it:options} ]    {break}
-
-{p 4 4 2}{bf:Options}
-
-{p 8 8 2}Main Options
-
-{col 5}Options{col 40}Description
-{space 4}{hline}
-{col 5}by({it:varname}){col 40}plot separate series for each group
-{col 5}compare({it:varname [ ,suboptions]}){col 40}estimate event coefficients for {bf:event} relative to those of {bf:compare} {help esplot##relative_estimates:more}{col 134}{break}{col 5}difference{col 40}estimate coefficients for each series in {bf:by} relative to the base level.{col 134}{break}{col 5}{ul:control}s({it:varlist}){col 40}{it:varlist} of controls to pass to internal {help reghdfe} call.
-{col 5}absorb({it:varlist}){col 40}{it:varlist} of fixed effects to absorb. see {help reghdfe}
-{col 5}vce( {help reghdfe##opt_vce:vce_opts} ){col 40}{bf:vce} options from {help reghdfe}.
-{space 4}{hline}
-{p 8 8 2} Display Options    {break}
-
-{col 5}Options{col 40}Description
-{space 4}{hline}
-{col 5}{ul:w}indow({it:start stop}){col 40}endpoints at which to truncate pre and post period.
-{col 5}{ul:period}_length({it:int}){col 40}smooth over {it:x} periods. e.g.  period_length(12) plots annual estimates from monthly data.
-{col 5}{ul:col}ors(  {browse "help colorstyle":colorstyle} {it:list}){col 40}manually set colors for each series
-{col 5}est_plot({it:est_opts}){col 40}switch plot style of estimates. currently {it:scatter} (default) and {it:line} are supported
-{col 5}ci_plot({it:ci_opts}){col 40}switch plot style of confidence intervals. currently {it:rcap} (default), {it:line}, and {it:rarea} are supported.
-{col 5}{helpb twoway_options}{col 40}edit titles,  style, etc
-{space 4}{hline}
-{p 8 8 2} Technical Options    {break}
-
-{col 5}Options{col 40}Description
-{space 4}{hline}
-{col 5}{ul:est}imate_reference{col 40}normalize by estimating and differencing out reference category.
-{col 5}{ul:save}data({it:filename [, replace]}){col 40}Save event-study estimates to {it:filename}. {it:replace} allowed.
-{space 4}{hline}
-{p 4 4 2}
-Data must be  {browse "help tsset":tsset} before calling {bf:esplot}    {break}
-{ul:fweight}, {ul:pweight}, and {ul:aweight}s  allowed;  {browse "help weight":weight}    {break}
-
-{title:Description}
+[{it:weight}], {bf:ev__ent({it:varname [, suboptions ]}) [  {it:options} ]    {break}
 
 {p 4 4 2}
-what does {bf:esplot} do?
+{it:or}
 
-{title:Details}
+{p 8 8 2} {bf:esplot} outcome [{it:if}] [{it:in}]
+[{it:weight}], {bf:ev__ent({it:varname [, suboptions ]}) [  {it:options} ]    {break}
+{title:  Documentation}
 
-{marker main_dets}{...}
-{dlgtab:Main Options}{...}
-
-
-{p 8 8 2} {bf:event} : indicator variable that takes the value 1 in the periods that an individual experiences an event (i.e. an event dummy). {bf:esplot} then estimates the event coefficients across time. Individuals may experience multiple events, or no events, over the course of the panel.    {break}
-
-{p 8 8 2} {bf:by} : calculate event study coefficients seperately for each value of {bf:by}.     {break}
-
-{p 8 8 2} {bf:compare} :  indicator variable that takes the value 1 in the periods that an individual experiences an event (i.e. an event dummy). In each period (and for each series specified in {bf:by_}), we estimate the relative event study coefficient {bf:event} - {bf:compare}. See  {browse "https://www.nber.org/papers/w26530":Cullen & Perez-Truglia, 2019} for an example of such a design, where the estimate of interest is the effect of switching from a female manager to male manager {it:relative} to switching from a female manager to another female manager.    {break}
-
-{p 8 8 2} {bf:difference} plots all series relative to the base level of {bf:by}. When used without {bf:compare}, it is analogous to a difference-in-difference estimate at every time {it:t}. When used {it:with} {bf:compare}, it is analogous to a triple-difference coefficient. See  {browse "https://www.nber.org/papers/w26530":Cullen & Perez-Truglia, 2019} for an example of such a triple-difference.    {break}
-
-{p 8 8 2} {bf:controls}, {bf:absorb}, {bf:vce} are passed directly to the internal {helpb reghdfe} call that estimates event study coefficients.    {break}
-
-{marker disp_dets}{...}
-{dlgtab:Display Options}{...}
-
-
-{p 8 8 2} {bf:window}: While not required, it is strongly recommended that users provide arguments to {bf:window}. {bf:window} takes two arguments (technically an ascending  {browse "help numlist":numlist} of length 2), which are the endpoints at which to truncate pre and post period. If {bf:window} is not specificed, {bf:esplot} will try to estimate coefficients across the maximum time window present in the panel. While many of these coefficients may drop out if there are no observations, this can be costly in terms of run time. If the first argument is non-negative, {bf:esplot} will display a warning (as no preperiod will be displayed), but will still try to plot results in the passed window.    {break}
-
-{p 8 8 2} {bf:period_length} allows for event study coefficients to be smoothed into groups of size {it:x}. For example, we could plot quarterly (or annual) estimates from a panel with monthly observations by typing {bf:period_length__(3) (or {bf:period_length__(12)). Confidence intervals and point estimates are calcuated using  {browse "help lincom":lincom}. Note that smoothing over larger time periods can lead to narrower confidence intervals, as point estimates that are individually insignificant may be jointly signifiant.     {break}
-
-{marker tech_dets}{...}
-{dlgtab:Technical Options}{...}
-
-
-{p 8 8 2} {bf:estimate_reference} by default, {bf:esplot} treats {it:t = -1} (or {bf:period_length} <= {it:t} <= {it:-1}, if {bf:period_length} is specified) as the omitted category, and coefficients are calculated in reference to this time period. When {bf:estimate_reference} is specified, the estimate for the reference category is explicitly calculated, and differenced out. If {bf:by} is specified, this is done seperately for each series. In this way, each series is normalized to the origin at {it:t = -1}.In some ways, this is analogous to including a fixed-effect for each series, as it will adjust for differences in levels across groups of {bf:by} or across individuals who ever have an event and those who do not. 
-
-{p 8 8 2} {bf:savedata} saves the point estimates, 95% confidence intervals, and p-values for all estimates for all series. This can be used to create custom graphs using twoway graph options that are not natively supported by {bf:esplot}. The data are labeled to make plotting simple. {it:replace} is allowed. see  {browse "https://dballaelliott.github.io/esplot/":online examples} for example workflow    {break}
+{title:Core Syntax }
 
 {p 4 4 2}
+{bf:esplot} can be called one of two ways. 
+
+{break}    1. with an event-time variable:
+
+    _esplot <outcome> <event_time> [, options]_
+
+{break}    2. or with an event indicator (on panel data):
+
+    _esplot <outcome>, event(<event_indicator> [, options])_
+
+{title:Options    {break}}
+
+{p 4 4 2}{bf:General Options    {break}}
+
+{p 8 8 2} {bf:compare(<event_indicator> [, options])} {it:Only available when using the event(<event_indicator>) syntax.} Plot the {it:difference} between the event-time coefficents associated with the event in {it:event} and the event given in {it:compare}. For example, {it:esplot infected, event(treatment) compare(placebo)} will estimate event-time coefficents around the {it:treatment} event and the {it:placebo} event and will plot the difference between the {it:treatment} and {it:placebo} arms.    {break}
+
+{p 4 4 2}{it:event_indicator suboptions (for compare and event)}
+
+{p 8 8 2} {bf:save} this causes the vector of relative-time indicators created by {it:esplot} around the event given in either {it:event} or {it:compare} to be saved to memory. This option is useful when running many specifications of the same event study, as it can save time when used with {it:nogen} by creating this vector only once.    {break}
+
+{p 8 8 2} {bf:nogen} this vector tells {it:esplot} that the vector of relative-time indicators around this particular event already exist (probably after being created by an earlier call to {it:esplot} with the {it:save} option.)    {break}
+
+{p 8 8 2} {bf:replace} allows {it:esplot} to write over the existing vector of relative-time indicators (rarely used.)    {break}
+
+{p 8 8 2} {bf:by(varname)} estimate coefficents seperately for each level of {it:by}. For example, {it:esplot wage years_since_policy, by(education)} will estimate the event-time coefficients for the relative time given in {it:years_since_policy} seperately for each level of {it:education} and plot as many series as there are levels of education. 
+
+{p 8 8 2} {bf:difference} estimate coefficents relative to the base-level of {it:by}. For example, if {it:education} has {it:k} levels, then typing {it:esplot wage years_since_policy, by(education)} will estimate the event-time coefficients for the relative time given in {it:years_since_policy} seperately for each level of {it:education} and plot the difference between each of the {it:k-1} sets of event-time coefficients and the base level of the {it:by} variable.
+
+{p 8 8 2} Using {it:difference} in combination with {it:compare} allows for the estimation of difference-in-difference-in-difference coefficients. 
+
+{p 8 8 2} {bf:estimate_reference}  by default, {it:esplot} includes indicator variables for all relative time periods except for -1. If the {it:estimate_reference} option is specified, the indicator for -1 is included and explicitly differenced out of the rest of the coefficients. When used with {it:by}, it recenters each series indepently, so that each series is mechanically 0 at time -1.
+
+{p 8 8 2} {bf:savedata(filename [,replace])}  in addition to plotting directly, {it:esplot} will save the estimated coefficients to {it:filename}. This allows for the greatest flexibility in plotting the estimates. Coefficents are saved {it:after} applying all operations, like differencing ({it:difference} or {it:compare}), or pooling ({it:period_length}). Can be abbreviated {it:save(...)}.
+
+{p 8 8 2} {bf:save_sample(varname)} store the output of {it:e(sample)} in {it:varname} following the internal regression call. 
+
+{p 4 4 2}{bf:Regression Options }
+
+{p 8 8 2} {bf:controls(varlist)} additional control variables to be included in the internal regression call.
+
+{p 8 8 2} {bf:absorb(varlist)} a vector of fixed effects to absorbed and not estimated in the internal regression call. {it:help reghdfe##absvar} for more information. 
+
+{p 8 8 2} {bf:vce(vcetype, subopt))} specify the types of standard errors computed. {it:help reghdfe##opt_vce} for more information. Not compatible with {it:quantile}.
+
+{p 8 8 2} {bf:quantile(0 < k < 100)} if this option is specified, {it:esplot} will use a quantile regression, rather than OLS. {it:quantile(50)} and {it:quantile(.5)} are synonyms, and will cause {it:esplot} to estimate a median regression. 
+
+{p 8 8 2} weights are allowed when using OLS (default), but not when {it:quantile} is specified. 
+
+{p 4 4 2}{bf:Display Options }
+
+{p 8 8 2} {bf:window(start end)} display dynamic effect estimates (event-time coefficents) ranging from {it:start} to {it:end}. {it:start} should be less than zero; {it:end} should be greater than zero. 
+
+{p 8 8 2} {bf:period_length(integer)} pool dynamic effect coefficients in groups of {it:period_length} before plotting. 
+
+{p 8 8 2} {bf:colors(colorstylelist)} ordered list of colors; used for point estimates and confidence intervals.    {break}
+
+
+{p 4 4 2}
+Additional {it:twoway} options can be specified and will be passed through to the internal {it:twoway} call. {it:help twoway}options_
 More complicated options are discussed below.    {break}
 
 {p 4 4 2}{bf:Relative Event-Study Coefficients with difference and compare}
@@ -113,29 +111,29 @@ More complicated options are discussed below.    {break}
 
 {p 4 4 2}
 {bf:Example 1}    {break}
-/* event lags and leads are saved */    {break}
+/} event lags and leads are saved {it:/    {break}
 {cmd:. esplot paygrade, by(male) event(to_male_mgr, save) window(-20 30) estimate_reference}    {break}
-/* esplot saves time by simply using the lags/leads from the previous call */    {break}
+/} esplot saves time by simply using the lags/leads from the previous call {it:/    {break}
 {cmd:. esplot ln_sal, by(male) event(to_male_mgr, nogen) window(-20 30) period_length(3)}    {break}
 
 {p 4 4 2}
 {bf:Example 2}    {break}
-/* event lags and leads are saved */    {break}
+/} event lags and leads are saved {it:/    {break}
 {cmd:. esplot paygrade, by(male) event(to_male_mgr, save) window(-20 30) period(3) estimate_reference}    {break}
-/* esplot saves time by simply using the lags/leads from the previous call */    {break}
+/} esplot saves time by simply using the lags/leads from the previous call {it:/    {break}
 {cmd:. esplot ln_sal, by(male) event(to_male_mgr, nogen) window(-20 30) period_length(3)}    {break}
-/*we wish to expand the window of the first plot. we tell esplot that it will find lags and leads in memory, but it can ignore and overwrite them */    {break}
+/_we wish to expand the window of the first plot. we tell esplot that it will find lags and leads in memory, but it can ignore and overwrite them {it:/    {break}
 {cmd:. esplot paygrade, by(male) event(to_male_mgr, replace) window(-40 60) period(6) estimate_reference}
 
 {p 4 4 2}
 {bf:Example 3}    {break}
-/* event lags and leads are saved */    {break}
+/} event lags and leads are saved {it:/    {break}
 {cmd:. esplot paygrade, by(male) event(to_male_mgr, save) window(-20 30) period(3)}    {break}
-/* esplot saves time by simply using the lags/leads from the previous call */    {break}
+/} esplot saves time by simply using the lags/leads from the previous call {it:/    {break}
 {cmd:. esplot ln_sal, by(male) event(to_male_mgr, nogen) window(-20 30) period_length(3)}    {break}
-/* There are differences in levels between males and females; we would like both series to go through the origin at t = -1.
+/} There are differences in levels between males and females; we would like both series to go through the origin at t = -1.
 we now want to use estimate_reference, 
-so we tell esplot that it will find lags and leads in memory, but it can ignore and overwrite them */    {break}
+so we tell esplot that it will find lags and leads in memory, but it can ignore and overwrite them {it:/    {break}
 {cmd:. esplot paygrade, by(male) event(to_male_mgr, save) window(-20 30) period(3) estimate_reference}    {break}
 
 {title:Remarks}
@@ -169,7 +167,9 @@ Functions
 {title:Acknowledgements}
 
 {p 4 4 2}
-This package was developed as an extension of code written for Cullen, Zoë B., and Ricardo Perez-Truglia. {it:The Old Boys{c 39} Club: Schmoozing and the Gender Gap.} No. {browse "https://www.nber.org/papers/w26530":w26530}. NBER, 2019. in my capacity as a research assistant to the authors. 
+This package was developed as an extension of code written for    {break}
+Cullen, Zoë B., and Ricardo Perez-Truglia. {it:The Old Boys{c 39} Club: Schmoozing and the Gender Gap.} No. {browse "https://www.nber.org/papers/w26530":w26530}. NBER, 2019. 
+in my capacity as a research assistant to the authors.    {break}
 
 {p 4 4 2}
 Katherine Fang and Jenna Anders made extensive contributions to early versions of the underlying code, which this package extends. Zoë Cullen and Ricardo Perez-Truglia guided development. Any remaining errors are mine
