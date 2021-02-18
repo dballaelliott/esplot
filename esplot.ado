@@ -1,4 +1,4 @@
-/*! v 0.8.6 1feb2021 Dylan Balla-Elliott, dballaelliott@gmail.com */
+/*! v 0.8.7 18feb2021 Dylan Balla-Elliott, dballaelliott@gmail.com */
 
 program define esplot, eclass sortpreserve
 
@@ -15,8 +15,8 @@ syntax varlist(max=2) [if] [in] [fweight pweight aweight/], ///
 	ESTimate_reference ///
 	difference ///
 	SAVEdata(string asis) ///
-	save_sample(name) /// 
-
+	recenter		///
+	
 	/** START REGRESSION OPTIONS **/
 	CONTROLs(varlist fv ts) absorb(passthru) vce(passthru) /// 
 
@@ -26,6 +26,7 @@ syntax varlist(max=2) [if] [in] [fweight pweight aweight/], ///
 	COLors(passthru) ///
 	est_plot(passthru) ci_plot(passthru) ///
 	legend(passthru) /// 
+	save_sample(name) /// 
 
 	/** quantile regression **/
 	Quantile(real -1) ///
@@ -34,6 +35,8 @@ syntax varlist(max=2) [if] [in] [fweight pweight aweight/], ///
 
 if "$esplot_nolog" == "" global esplot_nolog 1
 if $esplot_nolog == 1 global esplot_quietly "quietly :"
+
+if "$esplot_quietly" == "" global esplot_quietly "quietly :"
 else global esplot_quietly
 
 local wildcard_options `options'
@@ -86,7 +89,7 @@ local e_t: word 2 of `varlist'
 
 if `:word count `varlist'' == 2 & !missing("`event'`compare'") {
 	di as error "Compare and Event indicators not compatible with existing event time variable."
-	di as text "Try either " as input "esplot y, event(<event_indicator>)" as text "or " as input "esplot y <event_time> [, options]  "
+	di  "Try either" as input "esplot y, event(<event_indicator>)" as text "or" as input "esplot y <event_time>"
 	exit 
 }
 
@@ -284,13 +287,13 @@ if !missing("`save_sample'"){
 }
 
 /* if we have event time, then that's our event */
-if !missing("`e_t'") local event_name "`e_t'"
+local event_name "`e_t'"
 if $esplot_nolog{
 	ES_graph `y', event(`event_name') `pass_by' compare(`compare_name') `pass_window' /// 
-	`estimate_reference' `difference' period_length(`period_length') `colors' `est_plot' `ci_plot' `legend' `wildcard_options'
+	`estimate_reference' `difference' period_length(`period_length') `colors' `est_plot' `ci_plot' `legend' `wildcard_options' `recenter' 
 }
 else{
-	log_program `"ES_graph `y', event(`event_name') `pass_by' compare(`compare_name') `pass_window' `estimate_reference' `difference' period_length(`period_length') `colors' `est_plot' `ci_plot' `legend' `wildcard_options' "'
+	log_program `"ES_graph `y', event(`event_name') `pass_by' compare(`compare_name') `pass_window' `estimate_reference' `difference' period_length(`period_length') `colors' `est_plot' `ci_plot' `legend' `wildcard_options' `recenter' "'
 }
 
 if "`savedata'" != ""{
@@ -327,6 +330,7 @@ syntax varlist(max=1), ///
 	compare(passthru) /// compare(varname, save nogen)
 	estimate_reference ///
 	difference ///
+	recenter /// 
 	**START DISPLAY OPTIONS *
 	window(numlist max=2 min=2 integer ascending) ///
 	period_length(integer 1) /// 
@@ -375,6 +379,14 @@ else qui: levelsof `by', local(raw_by_groups)
 if !missing("`by'") & !missing("`difference'") local by_groups : list raw_by_groups - base_value_id 
 else local by_groups `raw_by_groups'
 
+** check that by_groups is non-empty 
+if missing("`by_groups'") {
+	tempname diff_msg
+	if !missing("`difference'") local `diff_msg' "after applying difference"
+	di as error "No remaining groups found in by variable ``diff_msg''."
+	exit
+}
+
 foreach x of local by_groups{
 	mat b_`x' = 0
 	mat se_`x' = 0
@@ -412,7 +424,32 @@ foreach x of local by_groups{
 	svmat b_`x'
 	svmat se_`x'
 	svmat p_`x'
+
+	if !missing("`recenter'"){
+		local reference_to_shift ""
+		
+		forval period_elems = 1/`period_length'{
+			local reference_to_shift "`reference_to_shift' F`period_elems'_`event' == 1"
+			if `period_elems' != `period_length' local reference_to_shift "`reference_to_shift' |"
+		}
+
+		
+		$esplot_quietly su `varlist' if (`reference_to_shift') & `by' == `x', meanonly
+		gen shift`x' = r(mean)	
+
+		if !missing("`difference'") {
+			$esplot_quietly su `varlist' if (`reference_to_shift') & `by' == `base_value_id', meanonly
+			replace shift`x' = shift - r(mean)	
+		}
+
+		replace b_`x'1 = b_`x'1 + shift`x'	
+
+	}
+
+
 }
+
+
 
 /********************************************
 
@@ -436,6 +473,7 @@ foreach x of local by_groups{
 }
 
 //matlist b_0 b_1 
+ 
 if "$esplot_quietly" == "" list `t' lo_* hi_* b_* in 1/`periods'
 
 if "`force'" != "" & "`yrange'" != ""{
