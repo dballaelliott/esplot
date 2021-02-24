@@ -6,13 +6,13 @@
 {title:Syntax}
 
 {p 8 8 2} {bf:esplot} varname [{it:if}] [{it:in}]
-[{it:weight}], {bf:ev__ent({it:varname [, suboptions ]}) [  {it:options} ]    {break}
+[{it:weight}], {it:event(varname [, suboptions]}) [{it:options} ]    {break}
 
 {p 4 4 2}
 {it:or}
 
 {p 8 8 2} {bf:esplot} outcome [{it:if}] [{it:in}]
-[{it:weight}], {bf:ev__ent({it:varname [, suboptions ]}) [  {it:options} ]    {break}
+[{it:weight}], {it:event(varname [, suboptions]}) [{it:options} ]    {break}
 {title:  Documentation}
 
 {title:Core Syntax }
@@ -141,38 +141,10 @@ so we tell esplot that it will find lags and leads in memory, but it can ignore 
 {p 4 4 2}
 See  {browse "https://dballaelliott.github.io/esplot/":website} for further discussion and for examples.
 
-{title:Stored results}
-
-
-{p 4 4 2}
-{bf:esplot} provides the following in {bf:e()}:
-
-{p 4 4 2}
-From internal {helpb reghdfe} call to estimate event study coefficients:
-
-{p 4 4 2}
-Scalars
-
-{p 8 8 2} {bf:r(N)}: number of observations 
-
-{p 4 4 2}
-Macros
-
-{p 4 4 2}
-Matrices
-
-{p 4 4 2}
-Functions
-
 {title:Acknowledgements}
 
 {p 4 4 2}
-This package was developed as an extension of code written for    {break}
-Cullen, Zoë B., and Ricardo Perez-Truglia. {it:The Old Boys{c 39} Club: Schmoozing and the Gender Gap.} No. {browse "https://www.nber.org/papers/w26530":w26530}. NBER, 2019. 
-in my capacity as a research assistant to the authors.    {break}
-
-{p 4 4 2}
-Katherine Fang and Jenna Anders made extensive contributions to early versions of the underlying code, which this package extends. Zoë Cullen and Ricardo Perez-Truglia guided development. Any remaining errors are mine
+Katherine Fang and Jenna Anders made extensive contributions to early versions of the underlying code, which this package extends. Any remaining errors are mine.
 
 {title:Author }
 
@@ -189,8 +161,6 @@ Bug-fixes, feature requests, and general comments are welcome via email, or dire
 
 {p 4 4 2}
 I currently plan on adding support for :    {break}
-    - bounds on attrition/sample selection (Lee, 2009) for single-event plots
-    - the extension of the above to "differenced" event-study plots as discussed in Cullen & Perez-Truglia (2019)
     - additional plot options
 
 {p 4 4 2}

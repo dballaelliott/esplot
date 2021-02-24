@@ -5,12 +5,12 @@ _version alpha-1_
 ## Syntax
 
 > __esplot__ varname [_if_] [_in_]
-[_weight_], __ev__ent(_varname [, suboptions ]_) [  _options_ ]  
+[_weight_], _event(varname [, suboptions]_) [_options_ ]  
 
 _or_
 
 > __esplot__ outcome [_if_] [_in_]
-[_weight_], __ev__ent(_varname [, suboptions ]_) [  _options_ ]  
+[_weight_], _event(varname [, suboptions]_) [_options_ ]  
   # Documentation
 
 ## Core Syntax 
