@@ -30,16 +30,18 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Set up Python runtime
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v2
         with:
           python-version: 3.x
 
       - name: Install Python dependencies
         run: |
+          pip install mkdocs-material
+          pip install pymdown-extensions
           pip install \
             mkdocs-minify-plugin>=0.3 \
             mkdocs-redirects>=1.0
+            
       - name: Deploy documentation
         run: |
           mkdocs gh-deploy --force
-          mkdocs --version
