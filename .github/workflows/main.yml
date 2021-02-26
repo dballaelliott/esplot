@@ -36,7 +36,6 @@ jobs:
 
       - name: Install Python dependencies
         run: |
-          pip install .
           pip install \
             mkdocs-minify-plugin>=0.3 \
             mkdocs-redirects>=1.0
