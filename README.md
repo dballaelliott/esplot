@@ -22,7 +22,7 @@ See [site](https://dballaelliott.github.io/esplot) for introduction and overview
 
 Type `help esplot` after installation for internal stata help documentation.
 
-#### Known Bugs & Change Log 
+### Known Bugs & Change Log 
 
 
 **`esplot` 0.9.1 (Feb 26/2021).** Adds support for alternate syntax when data cannot be `tsset` (i.e. are not panel data). 
