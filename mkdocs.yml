@@ -1,0 +1,70 @@
+site_name: "esplot: a stata package for event study plots"
+
+## additional 
+repo_url: https://github.com/dballaelliott/esplot
+repo_name: dballaelliott/esplot
+
+nav:
+  - 'index.md'
+  - 'options.md'
+  - 'event_study_intro.md'
+  # - 'coming_soon.md'
+
+markdown_extensions:
+  - def_list
+  - pymdownx.details
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.arithmatex:
+      generic: true
+  - toc:
+      permalink: ⚓︎
+
+extra:
+  social:
+    - icon: fontawesome/brands/twitter
+      link: https://twitter.com/dballaelliott    
+    - icon: fontawesome/brands/github
+      link: https://github.com/dballaelliott    
+    # - icon: fontawesome/solid/user-circle
+    #   link: personal site
+
+extra_javascript:
+  - javascripts/config.js
+  - https://polyfill.io/v3/polyfill.min.js?features=es6
+  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
+
+theme:
+  name: material
+  # custom_dir: material
+  palette:
+    scheme: preference
+  # 404 page
+  static_templates:
+    - 404.html
+
+  # Necessary for search to work properly
+  include_search_page: false
+  search_index_only: true
+
+  # Default values, taken from mkdocs_theme.yml
+  language: en
+  font:
+    text: Raleway
+    code: Fira Code
+
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.integrate
+    - navigation.instant
+    - navigation.expand
+
+  favicon: assets/images/favicon.png
+
+  icon:
+    logo: octicons/graph-16
+
+
+
+
