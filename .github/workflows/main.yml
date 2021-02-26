@@ -1,9 +1,14 @@
-name: ci
+# This is a basic workflow to help you get started with Actions
+name: rebuild
+
+# Controls when the action will run. 
 on:
+  workflow_dispatch:
   push:
     branches:
       - master
-      - pkg
+      - main
+  
 jobs:
   deploy:
     runs-on: ubuntu-latest
