@@ -1,5 +1,5 @@
 {smcl}
-{it:version alpha-1}
+{it:version 0.9.1}
 
 {title:esplot {hline 2} event study plots}
 
@@ -22,15 +22,15 @@
 
 {break}    1. with an event-time variable:
 
-    _esplot <outcome> <event_time> [, options]_
+{space 3}{cmd:. esplot <outcome> <event_time> [, options]}
 
 {break}    2. or with an event indicator (on panel data):
 
-    _esplot <outcome>, event(<event_indicator> [, options])_
+{space 3}{cmd: esplot <outcome>, event(<event_indicator> [, options])}
 
-{title:Options    {break}}
+{title:Options}
 
-{p 4 4 2}{bf:General Options    {break}}
+{p 4 4 2}{bf:General Options}
 
 {p 8 8 2} {bf:compare(<event_indicator> [, options])} {it:Only available when using the event(<event_indicator>) syntax.} Plot the {it:difference} between the event-time coefficents associated with the event in {it:event} and the event given in {it:compare}. For example, {it:esplot infected, event(treatment) compare(placebo)} will estimate event-time coefficents around the {it:treatment} event and the {it:placebo} event and will plot the difference between the {it:treatment} and {it:placebo} arms.    {break}
 
@@ -76,7 +76,10 @@
 
 
 {p 4 4 2}
-Additional {it:twoway} options can be specified and will be passed through to the internal {it:twoway} call. {it:help twoway}options_
+Additional {it:twoway} options can be specified and will be passed through to the internal {it:twoway} call. See {cmd:help twoway_options}.
+
+
+{p 4 4 2}
 More complicated options are discussed below.    {break}
 
 {p 4 4 2}{bf:Relative Event-Study Coefficients with difference and compare}
@@ -95,7 +98,7 @@ More complicated options are discussed below.    {break}
 {p 4 4 2}{bf:Efficiently Estimating Many Event-Study Plots: save, replace, nogen}
 
 {p 4 4 2}
-{bf:event} (and {bf:compare_}) have the sub-options {bf:save}, {bf:nogen}, and {bf:replace}, which are of primary use when estimating multiple specifications, or multiple outcomes. These options save, (and then subsequently read from the data in memory), event "lags and leads". The {bf:replace} example is provided for completeness, but should be used with caution, as it overwrites "lags and leads" saved in memory. By default, {bf:esplot} does not change the data in memory. 
+{bf:event} and {bf:compare} have the sub-options {bf:save}, {bf:nogen}, and {bf:replace}, which are of primary use when estimating multiple specifications, or multiple outcomes. These options save, (and then subsequently read from the data in memory), event "lags and leads". The {bf:replace} example is provided for completeness, but should be used with caution, as it overwrites "lags and leads" saved in memory. By default, {bf:esplot} does not change the data in memory. 
 
 {p 8 8 2} {bf:save} saves event lags {it:L<t>_<event>} (or {it:L<t>_<compare>}) and leads {it:F<t>_<event>} (or {it:F<t>_<compare>}). This sub-option can be selected for either, or both {bf:event} and {bf:compare}.
 
@@ -111,29 +114,29 @@ More complicated options are discussed below.    {break}
 
 {p 4 4 2}
 {bf:Example 1}    {break}
-/} event lags and leads are saved {it:/    {break}
+/* event lags and leads are saved */    {break}
 {cmd:. esplot paygrade, by(male) event(to_male_mgr, save) window(-20 30) estimate_reference}    {break}
-/} esplot saves time by simply using the lags/leads from the previous call {it:/    {break}
+/* esplot saves time by simply using the lags/leads from the previous call */    {break}
 {cmd:. esplot ln_sal, by(male) event(to_male_mgr, nogen) window(-20 30) period_length(3)}    {break}
 
 {p 4 4 2}
 {bf:Example 2}    {break}
-/} event lags and leads are saved {it:/    {break}
+/* event lags and leads are saved */    {break}
 {cmd:. esplot paygrade, by(male) event(to_male_mgr, save) window(-20 30) period(3) estimate_reference}    {break}
-/} esplot saves time by simply using the lags/leads from the previous call {it:/    {break}
+/* esplot saves time by simply using the lags/leads from the previous call */    {break}
 {cmd:. esplot ln_sal, by(male) event(to_male_mgr, nogen) window(-20 30) period_length(3)}    {break}
-/_we wish to expand the window of the first plot. we tell esplot that it will find lags and leads in memory, but it can ignore and overwrite them {it:/    {break}
+/*we wish to expand the window of the first plot. we tell esplot that it will find lags and leads in memory, but it can ignore and overwrite them */    {break}
 {cmd:. esplot paygrade, by(male) event(to_male_mgr, replace) window(-40 60) period(6) estimate_reference}
 
 {p 4 4 2}
 {bf:Example 3}    {break}
-/} event lags and leads are saved {it:/    {break}
+/* event lags and leads are saved */    {break}
 {cmd:. esplot paygrade, by(male) event(to_male_mgr, save) window(-20 30) period(3)}    {break}
-/} esplot saves time by simply using the lags/leads from the previous call {it:/    {break}
+/* esplot saves time by simply using the lags/leads from the previous call */    {break}
 {cmd:. esplot ln_sal, by(male) event(to_male_mgr, nogen) window(-20 30) period_length(3)}    {break}
-/} There are differences in levels between males and females; we would like both series to go through the origin at t = -1.
+/* There are differences in levels between males and females; we would like both series to go through the origin at t = -1.
 we now want to use estimate_reference, 
-so we tell esplot that it will find lags and leads in memory, but it can ignore and overwrite them {it:/    {break}
+so we tell esplot that it will find lags and leads in memory, but it can ignore and overwrite them */    {break}
 {cmd:. esplot paygrade, by(male) event(to_male_mgr, save) window(-20 30) period(3) estimate_reference}    {break}
 
 {title:Remarks}

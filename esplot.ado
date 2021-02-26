@@ -1,4 +1,4 @@
-/*! v 0.8.7 18feb2021 Dylan Balla-Elliott, dballaelliott@gmail.com */
+/*! v 0.9.1 26feb2021 Dylan Balla-Elliott, dballaelliott@gmail.com */
 
 program define esplot, eclass sortpreserve
 
