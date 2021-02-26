@@ -1,82 +1,80 @@
-_version alpha-1_
+_version 0.9.1_
 
 # esplot {hline 2} event study plots
 
 ## Syntax
 
 > __esplot__ varname [_if_] [_in_]
-[_weight_], **ev**ent(_varname [, suboptions ]_) [  _options_ ]  
+[_weight_], _event(varname [, suboptions]_) [_options_ ]  
+
+_or_
+
+> __esplot__ outcome [_if_] [_in_]
+[_weight_], _event(varname [, suboptions]_) [_options_ ]  
+  # Documentation
+
+## Core Syntax 
+
+__esplot__ can be called one of two ways. 
+
+1. with an event-time variable:
+
+   {cmd:. esplot <outcome> <event_time> [, options]}
+
+2. or with an event indicator (on panel data):
+
+   {cmd: esplot <outcome>, event(<event_indicator> [, options])}
+
+## Options
   
-### Options
-
->Main Options
+### General Options
   
-| Options | Description |
-|-----------------------------------| ----------------------------------------------------------------------------------------------|
-|by(_varname_)                      | plot separate series for each group |
-|compare(_varname [ ,suboptions]_)  | estimate event coefficients for __event__ relative to those of __compare__ {help esplot##relative_estimates:more} |  
-| difference |  estimate coefficients for each series in __by__ relative to the base level.  |  
-| **control**s(_varlist_)  | _varlist_ of controls to pass to internal {help reghdfe} call.|
-|absorb(_varlist_)         | _varlist_ of fixed effects to absorb. see {help reghdfe} |
-|vce( {help reghdfe##opt_vce:vce_opts} ) | __vce__ options from {help reghdfe}.| 
+> __compare(<event_indicator> [, options])__ _Only available when using the event(<event_indicator>) syntax._ Plot the _difference_ between the event-time coefficents associated with the event in _event_ and the event given in _compare_. For example, _esplot infected, event(treatment) compare(placebo)_ will estimate event-time coefficents around the _treatment_ event and the _placebo_ event and will plot the difference between the _treatment_ and _placebo_ arms.  
 
-> Display Options  
-
-| Options | Description |
-|-----------------------------------| ----------------------------------------------------------------------------------|
-| **w**indow(_start stop_)        | endpoints at which to truncate pre and post period.  |
-| **period**_length(_int_) | smooth over _x_ periods. e.g.  period_length(12) plots annual estimates from monthly data.|
-|**col**ors( [colorstyle](help colorstyle) _list_)    | manually set colors for each series | 
-|est_plot(_est_opts_)  | switch plot style of estimates. currently _scatter_ (default) and _line_ are supported |
-|ci_plot(_ci_opts_)  | switch plot style of confidence intervals. currently _rcap_ (default), _line_, and _rarea_ are supported. |
-|   {helpb twoway_options}   | edit titles,  style, etc |
-
-> Technical Options  
-
-| Options               | Description   |
-|-----------------------------------| ----------------------------------------------------------------------------------|
-|**est**imate_reference | normalize by estimating and differencing out reference category.|
-|**save**data(_filename [, replace]_) | Save event-study estimates to _filename_. _replace_ allowed. |
+#### event_indicator suboptions (for compare and event)
   
-Data must be [tsset](help tsset) before calling __esplot__  
-**fweight**, **pweight**, and **aweight**s  allowed; [weight](help weight)  
+> __save__ this causes the vector of relative-time indicators created by _esplot_ around the event given in either _event_ or _compare_ to be saved to memory. This option is useful when running many specifications of the same event study, as it can save time when used with _nogen_ by creating this vector only once.  
+  
+> __nogen__ this vector tells _esplot_ that the vector of relative-time indicators around this particular event already exist (probably after being created by an earlier call to _esplot_ with the _save_ option.)  
 
-## Description
+> __replace__ allows _esplot_ to write over the existing vector of relative-time indicators (rarely used.)  
 
-what does __esplot__ do?
+> __by(varname)__ estimate coefficents seperately for each level of _by_. For example, _esplot wage years_since_policy, by(education)_ will estimate the event-time coefficients for the relative time given in _years_since_policy_ seperately for each level of _education_ and plot as many series as there are levels of education. 
 
-## Details
+> __difference__ estimate coefficents relative to the base-level of _by_. For example, if _education_ has _k_ levels, then typing _esplot wage years_since_policy, by(education)_ will estimate the event-time coefficients for the relative time given in _years_since_policy_ seperately for each level of _education_ and plot the difference between each of the _k-1_ sets of event-time coefficients and the base level of the _by_ variable.
 
-{marker main_dets}{...}
-{dlgtab:Main Options}{...}
+> Using _difference_ in combination with _compare_ allows for the estimation of difference-in-difference-in-difference coefficients. 
+
+> __estimate_reference__  by default, _esplot_ includes indicator variables for all relative time periods except for -1. If the _estimate_reference_ option is specified, the indicator for -1 is included and explicitly differenced out of the rest of the coefficients. When used with _by_, it recenters each series indepently, so that each series is mechanically 0 at time -1.
+
+> __savedata(filename [,replace])__  in addition to plotting directly, _esplot_ will save the estimated coefficients to _filename_. This allows for the greatest flexibility in plotting the estimates. Coefficents are saved _after_ applying all operations, like differencing (_difference_ or _compare_), or pooling (_period_length_). Can be abbreviated _save(...)_.
+
+> __save_sample(varname)__ store the output of _e(sample)_ in _varname_ following the internal regression call. 
+
+### Regression Options 
+
+> __controls(varlist)__ additional control variables to be included in the internal regression call.
+
+> __absorb(varlist)__ a vector of fixed effects to absorbed and not estimated in the internal regression call. _help reghdfe##absvar_ for more information. 
+
+> __vce(vcetype, subopt))__ specify the types of standard errors computed. _help reghdfe##opt_vce_ for more information. Not compatible with _quantile_.
+
+> __quantile(0 < k < 100)__ if this option is specified, _esplot_ will use a quantile regression, rather than OLS. _quantile(50)_ and _quantile(.5)_ are synonyms, and will cause _esplot_ to estimate a median regression. 
+
+> weights are allowed when using OLS (default), but not when _quantile_ is specified. 
+
+### Display Options 
+
+> __window(start end)__ display dynamic effect estimates (event-time coefficents) ranging from _start_ to _end_. _start_ should be less than zero; _end_ should be greater than zero. 
+
+> __period_length(integer)__ pool dynamic effect coefficients in groups of _period_length_ before plotting. 
+
+> __colors(colorstylelist)__ ordered list of colors; used for point estimates and confidence intervals.  
 
 
-> __event__ : indicator variable that takes the value 1 in the periods that an individual experiences an event (i.e. an event dummy). __esplot__ then estimates the event coefficients across time. Individuals may experience multiple events, or no events, over the course of the panel.  
-
-> __by__ : calculate event study coefficients seperately for each value of __by__.   
- 
-> __compare__ :  indicator variable that takes the value 1 in the periods that an individual experiences an event (i.e. an event dummy). In each period (and for each series specified in __by__), we estimate the relative event study coefficient __event__ - __compare__. See [Cullen & Perez-Truglia, 2019](https://www.nber.org/papers/w26530) for an example of such a design, where the estimate of interest is the effect of switching from a female manager to male manager _relative_ to switching from a female manager to another female manager.  
-
-> __difference__ plots all series relative to the base level of __by__. When used without __compare__, it is analogous to a difference-in-difference estimate at every time _t_. When used _with_ __compare__, it is analogous to a triple-difference coefficient. See [Cullen & Perez-Truglia, 2019](https://www.nber.org/papers/w26530) for an example of such a triple-difference.  
-
-> __controls__, __absorb__, __vce__ are passed directly to the internal {helpb reghdfe} call that estimates event study coefficients.  
-
-{marker disp_dets}{...}
-{dlgtab:Display Options}{...}
-
-
-> __window__: While not required, it is strongly recommended that users provide arguments to __window__. __window__ takes two arguments (technically an ascending [numlist](help numlist) of length 2), which are the endpoints at which to truncate pre and post period. If __window__ is not specificed, __esplot__ will try to estimate coefficients across the maximum time window present in the panel. While many of these coefficients may drop out if there are no observations, this can be costly in terms of run time. If the first argument is non-negative, __esplot__ will display a warning (as no preperiod will be displayed), but will still try to plot results in the passed window.  
-
-> __period_length__ allows for event study coefficients to be smoothed into groups of size _x_. For example, we could plot quarterly (or annual) estimates from a panel with monthly observations by typing __period_length__(3) (or __period_length__(12)). Confidence intervals and point estimates are calcuated using [lincom](help lincom). Note that smoothing over larger time periods can lead to narrower confidence intervals, as point estimates that are individually insignificant may be jointly signifiant.   
-
-{marker tech_dets}{...}
-{dlgtab:Technical Options}{...}
-
-
-> __estimate_reference__ by default, __esplot__ treats _t = -1_ (or __period_length__ <= _t_ <= _-1_, if __period_length__ is specified) as the omitted category, and coefficients are calculated in reference to this time period. When __estimate_reference__ is specified, the estimate for the reference category is explicitly calculated, and differenced out. If __by__ is specified, this is done seperately for each series. In this way, each series is normalized to the origin at _t = -1_.In some ways, this is analogous to including a fixed-effect for each series, as it will adjust for differences in levels across groups of __by__ or across individuals who ever have an event and those who do not. 
-
-> __savedata__ saves the point estimates, 95% confidence intervals, and p-values for all estimates for all series. This can be used to create custom graphs using twoway graph options that are not natively supported by __esplot__. The data are labeled to make plotting simple. _replace_ is allowed. see [online examples](https://dballaelliott.github.io/esplot/) for example workflow  
-
+Additional _twoway_ options can be specified and will be passed through to the internal _twoway_ call. See {cmd:help twoway_options}.
+  
+  
 More complicated options are discussed below.  
   
 ### Relative Event-Study Coefficients with difference and compare
@@ -93,7 +91,7 @@ __esplot__ has two suboptions to estimate and "difference out" reference coeffic
 
 ### Efficiently Estimating Many Event-Study Plots: save, replace, nogen
 
-__event__ (and __compare__) have the sub-options __save__, __nogen__, and __replace__, which are of primary use when estimating multiple specifications, or multiple outcomes. These options save, (and then subsequently read from the data in memory), event "lags and leads". The __replace__ example is provided for completeness, but should be used with caution, as it overwrites "lags and leads" saved in memory. By default, __esplot__ does not change the data in memory. 
+__event__ and __compare__ have the sub-options __save__, __nogen__, and __replace__, which are of primary use when estimating multiple specifications, or multiple outcomes. These options save, (and then subsequently read from the data in memory), event "lags and leads". The __replace__ example is provided for completeness, but should be used with caution, as it overwrites "lags and leads" saved in memory. By default, __esplot__ does not change the data in memory. 
 
 > __save__ saves event lags _L<t>_<event>_ (or _L<t>_<compare>_) and leads _F<t>_<event>_ (or _F<t>_<compare>_). This sub-option can be selected for either, or both __event__ and __compare__.
 
@@ -135,32 +133,11 @@ so we tell esplot that it will find lags and leads in memory, but it can ignore 
 
 See [website](https://dballaelliott.github.io/esplot/) for further discussion and for examples.
 
-## Stored results
-
-
-__esplot__ provides the following in __e()__:
-
-From internal {helpb reghdfe} call to estimate event study coefficients:
-
-Scalars
-
-> __r(N)__: number of observations 
-
-Macros
-
-Matrices
-
-Functions
-
 ## Acknowledgements
 
-This package was developed as an extension of code written for  
-Cullen, Zoë B., and Ricardo Perez-Truglia. _The Old Boys' Club: Schmoozing and the Gender Gap._ No.[w26530](https://www.nber.org/papers/w26530). NBER, 2019.  
-in my capacity as a research assistant to the authors.  
+Katherine Fang and Jenna Anders made extensive contributions to early versions of the underlying code, which this package extends. Any remaining errors are mine.
 
-Katherine Fang and Jenna Anders made extensive contributions to early versions of the underlying code, which this package extends. Zoë Cullen and Ricardo Perez-Truglia guided development. Any remaining errors are mine.
-
-## Author 
+## Author
 
 Dylan Balla-Elliott  
 Research Associate, Harvard Business School  
@@ -172,8 +149,6 @@ dballaelliott@gmail.com
 Bug-fixes, feature requests, and general comments are welcome via email, or directly as issues on github.  
 
 I currently plan on adding support for :  
-    - bounds on attrition/sample selection (Lee, 2009) for single-event plots
-    - the extension of the above to "differenced" event-study plots as discussed in Cullen & Perez-Truglia (2019)
     - additional plot options
 
 Extensions via forks/pull requests by github users are welcomed.  

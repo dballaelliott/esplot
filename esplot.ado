@@ -1,4 +1,4 @@
-/*! version 0.8.5  1feb2021 Dylan Balla-Elliott, dballaelliott@gmail.com */
+/*! v 0.9.1 26feb2021 Dylan Balla-Elliott, dballaelliott@gmail.com */
 
 program define esplot, eclass sortpreserve
 
@@ -6,59 +6,123 @@ version 11
 
 #delimit ;
 /* TODO : make difference a by sub-option */
-syntax varlist(max=1) [if] [in] [fweight pweight aweight/], ///
-	EVent(string asis) /// event(varname, save nogen)
+syntax varlist(max=2) [if] [in] [fweight pweight aweight/], ///
+	[EVent(string asis)] /// event(varname, save nogen)
  	[ /// 
-	** GENERAL OPTIONS **
+	/** GENERAL OPTIONS **/
 	by(varname numeric) ///
 	compare(string asis) /// compare(varname, save nogen)
 	ESTimate_reference ///
 	difference ///
 	SAVEdata(string asis) ///
-	**START REGRESSION OPTIONS **
+	recenter		///
+	
+	/** START REGRESSION OPTIONS **/
 	CONTROLs(varlist fv ts) absorb(passthru) vce(passthru) /// 
 
-	**START DISPLAY OPTIONS
+	/**START DISPLAY OPTIONS */
 	Window(numlist max=2 min=2 integer ascending) ///
 	PERIOD_length(integer 1) /// 
 	COLors(passthru) ///
 	est_plot(passthru) ci_plot(passthru) ///
 	legend(passthru) /// 
+	save_sample(name) /// 
+
+	/** quantile regression **/
+	Quantile(real -1) ///
 	* ];
 # delimit cr
 
-set more off
-
 if "$esplot_nolog" == "" global esplot_nolog 1
 if $esplot_nolog == 1 global esplot_quietly "quietly :"
+
+if "$esplot_quietly" == "" global esplot_quietly "quietly :"
 else global esplot_quietly
+
+local wildcard_options `options'
 
 /*****************************************************
 		Initial checks and warnings
 *****************************************************/
+/* process quantile regression */
+if `quantile' == -1 {
+	local regression reghdfe
+} 
+else if `quantile' >= 100 | `quantile' <= 0{
+	di as error "`quantile' is not a valid quantile; try .5 for median regression."
+	exit 198  
+}
+else if `quantile' >= 1{
+	local q = `quantile'/100
+	local regression bsqreg
+}
+else {
+	local q = `quantile'
+	local regression bsqreg
+}
+
+/* parse FE for quantile regression */
+if !missing("`absorb'") local main_absorb `absorb'
+else local main_absorb "noabsorb"
+
+if `quantile' != -1 & !missing("`absorb'"){
+
+	local absorb_var: subinstr local absorb "absorb(" ""
+	local absorb_var: subinstr local absorb_var ")" ""
+	extract_varlist `absorb_var'
+		
+	local qreg_fe = r(varlist)
+
+
+}
+
+if !missing("`save_sample'"){
+	/* if it is a variable this is a problem */
+	/* this will exit with an error */
+	gen `save_sample' = .
+	qui: ds
+	local save_sample_vars_to_keep = r(varlist)
+} 
+/* pull out outcome */
+local y: word 1 of `varlist'
+local e_t: word 2 of `varlist'
+
+if `:word count `varlist'' == 2 & !missing("`event'`compare'") {
+	di as error "Compare and Event indicators not compatible with existing event time variable."
+	di  "Try either" as input "esplot y, event(<event_indicator>)" as text "or" as input "esplot y <event_time>"
+	exit 
+}
+
 
 if "`window'" != "" {
 	gettoken first_period last_period: (local) window
 	if `first_period' >= 0 di as text "Warning: No pre-period displayed. Try adjusting " as input "window"
 }
 
-if "`absorb'" == "" local absorb "noabsorb"
+if missing("`e_t'"){
+	$esplot_quietly tsset 
+	local id `r(panelvar)'
+	local max_delta = `r(tmax)' - `r(tmin)'
 
-$esplot_quietly tsset 
-local id `r(panelvar)'
-local max_delta = `r(tmax)' - `r(tmin)'
+	if "`window'" == ""{
+		local first_period = -`max_delta'
+		local last_period = `max_delta'
+	}
+}
+else {
+	qui: su `e_t'
 
-if "`window'" == ""{
-	local first_period = -`max_delta'
-	local last_period = `max_delta'
+	local max_delta = max(abs(r(min)),r(max))
+
+	if "`window'" == ""{
+		local first_period = r(min)
+		local last_period = r(max)
+	}
 }
 
 if "`estimate_reference'" != "" local omitted_threshold = - 1
 else local omitted_threshold = - `period_length' - 1
 
-/* foreach var in "by" "window"{
-	if "``var''" != "" local pass_`var' = "`var'(``var'')"
-} */
 if "`by'" != "" local pass_by = "by(`by')"
 local pass_window = "window(`first_period' `last_period')"
 
@@ -66,8 +130,8 @@ if "`by'" == "" & "`difference'" != ""{
 	di as error "Error:" as input "by" as error "is required to use" as input "difference"
 	exit 
 }
-/* PARSE EVENT AND COMPARE */
 
+/* PARSE EVENT AND COMPARE */
 tokenize `: subinstr local event "," "|" ', parse("|")
 local event_name `1'
 if "`3'" != ""{
@@ -81,8 +145,6 @@ foreach arg in 1 2 3{
 			di as error "``arg'' not a valid sub-option of " as input "event"
 			exit
 		}
-		//di `"|``arg''_event| == |'``arg''_event'| "'
-
 	}
 }
 }
@@ -133,31 +195,22 @@ local reg_weights
 if "`exp'" != "" & "`weight'" !="" local reg_weights "[`weight'=`exp']"
 else if "`exp'" != "" /* and weight is missing */ local reg_weights "[aw=`exp']"
 
-/*!  Add check that I can save the file if you want me to save it
-** want to throw the error now, not after everything has run */
-/* 	if "`replace'"=="" {
-		if `"`savegraph'"'!="" {
-			if regexm(`"`savegraph'"',"\.[a-zA-Z0-9]+$") confirm new file `"`savegraph'"'
-			else confirm new file `"`savegraph'.gph"'
-		}
-		if `"`savedata'"'!="" {
-			confirm new file `"`savedata'.csv"'
-			confirm new file `"`savedata'.do"'
-		}
-	}
- */
 local lags 
 local leads 
 local L_absorb
 local F_absorb
 local endpoints
 
+local e_t_name `e_t' 
+if !missing("`e_t'") local ev_list "e_t"
+
 foreach ev of local ev_list{
 	//if "`nogen_`ev''" == "nogen" continue
 	if "``ev'_name'" == "" continue
 	// Make event lags..
 	forvalues i = 0/`max_delta'{
-		if "`nogen_`ev''" == "" cap: gen L`i'_``ev'_name' = L`i'.``ev'_name' == 1
+		if !missing("`e_t'") gen L`i'_``ev'_name' = `e_t' == `i'
+		else if "`nogen_`ev''" == "" cap: gen L`i'_``ev'_name' = L`i'.``ev'_name' == 1
 		if _rc == 110{
 			local old_rc _rc
 			if "`replace_`ev''" == "replace" $esplot_quietly replace L`i'_``ev'_name' = L`i'.``ev'_name' == 1
@@ -168,7 +221,7 @@ foreach ev of local ev_list{
 				error `old_rc'
 			}
 		}
-		else error _rc 
+		/* else error _rc  */
 
 		if `i' <= `last_period'{
 			if "`by'" == "" local lags "`lags' L`i'_``ev'_name'" 
@@ -179,7 +232,8 @@ foreach ev of local ev_list{
 	// .. and event leads
 	forvalues i = -`max_delta'/`omitted_threshold'{
 		local j = abs(`i')
-		if "`nogen_`ev''" == "" cap: gen F`j'_``ev'_name' = F`j'.``ev'_name' == 1
+		if !missing("`e_t'") gen F`j'_``ev'_name'  = `e_t' == -`j'
+		else if "`nogen_`ev''" == "" cap: gen F`j'_``ev'_name' = F`j'.``ev'_name' == 1
 		if _rc == 110{
 			local old_rc _rc
 			if "`replace_`ev''" == "replace" $esplot_quietly replace F`j'_``ev'_name' = F`j'.``ev'_name' == 1
@@ -190,7 +244,7 @@ foreach ev of local ev_list{
 				error `old_rc'
 			}
 		}
-		else error _rc 
+		/* else error _rc  */
 
 		if `i' >= `first_period'{
 			if "`by'" == "" local leads "`leads' F`j'_``ev'_name'"
@@ -199,42 +253,10 @@ foreach ev of local ev_list{
 		else local F_absorb " `F_absorb' F`j'_``ev'_name'"
 	}
 
-	if "`nogen_`ev''" == "" & "`window'" != "" cap: egen Lend_``ev'_name' = rowmax(`L_absorb')
-	if _rc == 110{
-			local old_rc _rc
-			if "`replace_`ev''" == "replace"{
-				$esplot_quietly drop Lend_``ev'_name'
-				$esplot_quietly egen Lend_``ev'_name' = rowmax(`L_absorb')
-			} 
-			else {
-				di as error "variable Lend_``ev'_name' already defined."
-				di as text "Type ..." as input "`ev'(``ev'_name', replace)" as text "... if you'd like to overwrite existing lags/leads"
-				di as text "Type ..." as input "`ev'(``ev'_name', nogen)" as text "... if you'd like to use the lags/leads in memory"
-				error `old_rc'
-			}
-		}
-		else error _rc 
-
-	if "`nogen_`ev''" == ""  & "`window'" != "" cap: egen Fend_``ev'_name' = rowmax(`F_absorb')
-		if _rc == 110{
-			local old_rc _rc
-			if "`replace_`ev''" == "replace"{
-				$esplot_quietly drop Fend_``ev'_name'
-				$esplot_quietly egen Fend_``ev'_name' = rowmax(`F_absorb')
-			} 
-			else {
-				di as error "variable Fend_``ev'_name' already defined."
-				di as text "Type ..." as input "`ev'(``ev'_name', replace)" as text "... if you'd like to overwrite existing lags/leads"
-				di as text "Type ..." as input "`ev'(``ev'_name', nogen)" as text "... if you'd like to use the lags/leads in memory"
-				error `old_rc'
-			}
-		}
-		else error _rc 
-
-	if "`window'" != "" {
-		if "`by'" == "" local endpoints "`endpoints' Lend_``ev'_name' Fend_``ev'_name'"
-		else local endpoints "`endpoints' Lend_``ev'_name' Fend_``ev'_name' i.`by'#c.Lend_``ev'_name' i.`by'#c.Fend_``ev'_name' "
-	}
+	
+	if "`by'" == "" local endpoints "`endpoints' `F_absorb' `L_absorb'"
+	else local endpoints "`endpoints' i.`by'#(`F_absorb' `L_absorb')"
+	
 	/* just save if we said to save, not to save later 
 		(this is because if both passed save, it'll try to preserve twice,
 		so we switch to "saveLater" if both pass save)
@@ -250,19 +272,33 @@ if "`save_compare'`save_event'" == "saveLatersaveLater" preserve
 cap: preserve
 assert _rc == 621
 
-$esplot_quietly reghdfe `varlist' `leads' `lags' `endpoints' `controls' `if' `in' `reg_weights', `absorb' `vce'
+if "`regression'" == "reghdfe"{
+	$esplot_quietly reghdfe `y' `leads' `lags' `endpoints' `controls' `if' `in' `reg_weights', `main_absorb' `vce'
+}
+else if "`regression'" == "bsqreg"{
+	if !missing("`vce'") di "Warning: option `vce' ignored with quantile regression"
+	$esplot_quietly bsqreg `y' `leads' `lags' `endpoints' `controls' `qreg_fe' `if' `in' `reg_weights',  quantile(`q')
+}
+if !missing("`save_sample'"){
+	/* confirm we can make the variable */
+	replace `save_sample' = e(sample)
+	tempfile sample_info
+	save `sample_info', replace 
+}
 
+/* if we have event time, then that's our event */
+local event_name "`e_t'"
 if $esplot_nolog{
-	ES_graph `varlist', event(`event_name') `pass_by' compare(`compare_name') `pass_window' /// 
-	`estimate_reference' `difference' period_length(`period_length') `colors' `est_plot' `ci_plot' `legend' `options'
+	ES_graph `y', event(`event_name') `pass_by' compare(`compare_name') `pass_window' /// 
+	`estimate_reference' `difference' period_length(`period_length') `colors' `est_plot' `ci_plot' `legend' `wildcard_options' `recenter' 
 }
 else{
-	log_program `"ES_graph `varlist', event(`event_name') `pass_by' compare(`compare_name') `pass_window' `estimate_reference' `difference' period_length(`period_length') `colors' `est_plot' `ci_plot' `legend' `options' "'
+	log_program `"ES_graph `y', event(`event_name') `pass_by' compare(`compare_name') `pass_window' `estimate_reference' `difference' period_length(`period_length') `colors' `est_plot' `ci_plot' `legend' `wildcard_options' `recenter' "'
 }
 
 if "`savedata'" != ""{
-	keep x lo_* hi_* b_* p_* se_*
-	rename x t 
+	keep $ESPLOT_TIME_VAR lo_* hi_* b_* p_* se_*
+	rename $ESPLOT_TIME_VAR t 
 	if `period_length' > 1 label var t "Time (averaging over `period_length' periods)"
 	else label var t "Time"
 	/* see if replace is specified */
@@ -272,6 +308,11 @@ if "`savedata'" != ""{
 }
 restore 
 
+if !missing("`save_sample'"){
+	use `sample_info', clear 
+
+	keep `save_sample_vars_to_keep'
+}
 end
 
 
@@ -289,6 +330,7 @@ syntax varlist(max=1), ///
 	compare(passthru) /// compare(varname, save nogen)
 	estimate_reference ///
 	difference ///
+	recenter /// 
 	**START DISPLAY OPTIONS *
 	window(numlist max=2 min=2 integer ascending) ///
 	period_length(integer 1) /// 
@@ -301,11 +343,11 @@ syntax varlist(max=1), ///
 if "`by'" != ""{
 	$esplot_quietly su `by'
 	local base_value "base_value(`r(min)')"
+	local base_value_id `r(min)'
 }
 if "`by'" != "" local pass_by = "by(`by')"
 
-/* TODO WRITE EXTRACT ARG 
-takes in a pass thru arg of the form varname(arg) and returns "arg" */
+/* takes in a pass thru arg of the form varname(arg) and returns "arg" */
 
 gettoken first_period last_period: (local) window
 
@@ -331,8 +373,19 @@ To(string) From(string) by(varname) ///
  filetype(string) tag(string) ev_tag(string) nodd NODROP mgr_time force animate estimate_reference]
  */
 
-if "`by'" == "" local by_groups = 0
-else qui: levelsof `by', local(by_groups)
+if "`by'" == "" local raw_by_groups = 0
+else qui: levelsof `by', local(raw_by_groups)
+
+if !missing("`by'") & !missing("`difference'") local by_groups : list raw_by_groups - base_value_id 
+else local by_groups `raw_by_groups'
+
+** check that by_groups is non-empty 
+if missing("`by_groups'") {
+	tempname diff_msg
+	if !missing("`difference'") local `diff_msg' "after applying difference"
+	di as error "No remaining groups found in by variable ``diff_msg''."
+	exit
+}
 
 foreach x of local by_groups{
 	mat b_`x' = 0
@@ -343,10 +396,10 @@ foreach x of local by_groups{
 	forvalues t = `first_period'(`period_length')`omitted_threshold'{
 		local j = abs(`t')
 		if $esplot_nolog{
-			lincom_quarter, lead event(`event') `base_value' `pass_by' `compare' `estimate_reference' `difference' coef_id(`x') time(`j') period_length(`period_length')
+			aggregate_periods, lead event(`event') `base_value' `pass_by' `compare' `estimate_reference' `difference' coef_id(`x') time(`j') period_length(`period_length')
 		}
 		else{
-			log_program `"lincom_quarter, lead event(`event') `base_value' `pass_by' `compare' `estimate_reference' `difference' coef_id(`x') time(`j') period_length(`period_length')"'
+			log_program `"aggregate_periods, lead event(`event') `base_value' `pass_by' `compare' `estimate_reference' `difference' coef_id(`x') time(`j') period_length(`period_length')"'
 		}
 	}
 	// If we aren't estimating the reference category, then we add the zero 
@@ -357,10 +410,10 @@ foreach x of local by_groups{
 	}
 
 	//Add dot at event-time 0 
-	lincom_quarter, lag event(`event') `base_value' `pass_by' `compare' `estimate_reference' `difference' coef_id(`x') time(0)
+	aggregate_periods, lag event(`event') `base_value' `pass_by' `compare' `estimate_reference' `difference' coef_id(`x') time(0)
 
 	forvalues t = `period_length'(`period_length')`last_period'{
-		lincom_quarter, lag event(`event') `base_value' `pass_by' `compare' `estimate_reference' `difference' coef_id(`x') time(`t') period_length(`period_length')
+		aggregate_periods, lag event(`event') `base_value' `pass_by' `compare' `estimate_reference' `difference' coef_id(`x') time(`t') period_length(`period_length')
 	}
 	//Add post-period coefficients
 	** transpose all the matrices
@@ -371,7 +424,32 @@ foreach x of local by_groups{
 	svmat b_`x'
 	svmat se_`x'
 	svmat p_`x'
+
+	if !missing("`recenter'"){
+		local reference_to_shift ""
+		
+		forval period_elems = 1/`period_length'{
+			local reference_to_shift "`reference_to_shift' F`period_elems'_`event' == 1"
+			if `period_elems' != `period_length' local reference_to_shift "`reference_to_shift' |"
+		}
+
+		
+		$esplot_quietly su `varlist' if (`reference_to_shift') & `by' == `x', meanonly
+		gen shift`x' = r(mean)	
+
+		if !missing("`difference'") {
+			$esplot_quietly su `varlist' if (`reference_to_shift') & `by' == `base_value_id', meanonly
+			replace shift`x' = shift - r(mean)	
+		}
+
+		replace b_`x'1 = b_`x'1 + shift`x'	
+
+	}
+
+
 }
+
+
 
 /********************************************
 
@@ -383,15 +461,20 @@ $esplot_quietly drop in 1 //drop the initial 0 in all the matrices
 
 local periods = floor(abs(`first_period')/`period_length') + floor(`last_period'/`period_length') + 1
 *x values
-$esplot_quietly gen x = _n - abs(floor(`first_period'/`period_length')) - 1 if _n <= `periods' 
+tempvar t 
+global ESPLOT_TIME_VAR `t'
+$esplot_quietly gen `t' = _n - abs(floor(`first_period'/`period_length')) - 1 if _n <= `periods' 
+label variable `t' "event time"
 
 foreach x of local by_groups{
+	
 	$esplot_quietly gen lo_`x' = b_`x'1 - se_`x'1*1.96
 	$esplot_quietly gen hi_`x' = b_`x'1 + se_`x'1*1.96
 }
 
 //matlist b_0 b_1 
-if "$esplot_quietly" == "" list x lo_* hi_* b_* in 1/`periods'
+ 
+if "$esplot_quietly" == "" list `t' lo_* hi_* b_* in 1/`periods'
 
 if "`force'" != "" & "`yrange'" != ""{
 	tokenize `yrange'
@@ -442,34 +525,34 @@ foreach x of local by_groups{
 	if "`color_id'" == "" {
 		if "`colors'" != "" di as error "No color found for plot `plot_id'; using default."
 
-		local color_id "`.__SCHEME.color.p`plot_id''"
+		local color_id `.__SCHEME.color.p`plot_id''
 	}
 	
 	/* todo: let people pass whatever they want to ci and est opts, including suboptions */
 	if "`est_plot'" == "line"{
-		local b_to_plot `"line b_`x'1 x, lcolor("`color_id'")"'
+    local b_to_plot `"line b_`x' `t', lcolor(`"`color_id'"')"'
 	}
 	else if "`est_plot'" == "scatter" | "`est_plot'" == "" {
-		local b_to_plot `"scatter b_`x'1 x, mcolor("`color_id'")"'
+		local b_to_plot `"scatter b_`x' `t', mcolor(`"`color_id'"')"'
 	}
 	else {
 		di as error "Unsupported plot type for estimates: `est_plot'. Using default"
-		local b_to_plot `"scatter b_`x'1 x, mcolor("`color_id'")"'
+		local b_to_plot `"scatter b_`x' `t', mcolor(`"`color_id'"')"'
 	}
 
 
 	if "`ci_plot'" == "line"{
-		local ci_to_plot `"line lo_`x' hi_`x' x, lcolor("`color_id'%80*.75" "`color_id'%80*.75")"' // lpattern(dash)
+		local ci_to_plot `"line lo_`x' hi_`x' `t', lcolor(`"`color_id'%80*.75"' `"`color_id'%80*.75"')"' // lpattern(dash)
 		local legend_num = `plot_id'*3
 
 	}
 	else if "`ci_plot'" == "rcap" | "`ci_plot'" == "" {
-		local ci_to_plot `"rcap lo_`x' hi_`x' x, lcolor("`color_id'%80*.75")"'
+		local ci_to_plot `"rcap lo_`x' hi_`x' `t', lcolor(`"`color_id'%80*.75"')"'
 		local legend_num = `plot_id'*2 
 	}
 	else {
 		if "`ci_plot'" != "rarea" di as text "Unsupported plot type for confidence intervals: " as input "`est_plot'" as text " . Using default"
-		local ci_to_plot `" rarea lo_`x' hi_`x' x, fcolor("`color_id'%30") lcolor("`color_id'%0") "'
+		local ci_to_plot `" rarea lo_`x' hi_`x' `t', fcolor(`"`color_id'%30"') lcolor(`"`color_id'%0"') "'
 		local legend_num = `plot_id'*2 
 	}
 	
@@ -513,24 +596,24 @@ in particular, by default should make sure there isn't unneccessary white space.
 this looks pretty dumb when used with rarea */
 if `make_legend' local legend_info = `"order(`legend_info')"'
 
-if "`legend'" != ""{
+if !missing(`"`legend'"') {
 	if strpos(`"`legend'"',"order") | strpos(`"`legend'"',"label") local legend_info `"`legend'"'
 	else local legend_options `"`legend'"'
 }
 
-if `"`legend_info'`legend_options'"' != "" local twoway_option `", legend(`legend_info' `legend_options') `options' "'
-else if "`options'" != "" local twoway_option ","
+if !missing(`"`legend_info'`legend_options'"') local twoway_option `" legend(`legend_info' `legend_options') `options' "'
+else if !missing(`"`options'"') local twoway_option `" `options'"'
 
 
-`plot_command' `twoway_option' `options'
+`plot_command' `twoway_option' 
 
 //saveCoefs `coefs', as(`varlist'_`from'2`to'`tag') `triple_dif' `symmetric' `dd'
 
 end
 
 
-capture program drop lincom_quarter
-program lincom_quarter
+capture program drop aggregate_periods
+program aggregate_periods
 
 #delimit ;
 syntax , ///
@@ -560,13 +643,13 @@ triple_dif SYMmetric ev_tag(string) NODROP reference(int 3)]
 local i = `time'
 
 if "`lead'" != "" & "`lag'" != "" {
-	di as error "Please select either lag or lead, not both in lincom_quarter"
+	di as error "Please select either lag or lead, not both in aggregate_periods"
 	exit 198
 }
 else if "`lead'" != "" local t "F"
 else if "`lag'" != "" local t "L"
 else { // both are missing
-	di as error "Please select either lag or lead in lincom_quarter"
+	di as error "Please select either lag or lead in aggregate_periods"
 	exit 198
 }
 
@@ -668,48 +751,11 @@ else { // **both of these varlists are non-empty
 
 end
 
+program extract_varlist, rclass 
+syntax varlist(fv ts)
 
-capture program drop saveCoefs
-program saveCoefs
-	syntax namelist, [symmetric triple_dif nodd as(string)] 
+return local varlist `"`varlist'"' 
 
-	local coefs `namelist'
-
-	drop if missing(x)
-
-	tempfile to_write 
-	save `to_write', replace 
-
-	foreach x of local coefs {
-		keep x lo_`x' hi_`x' b_`x' se_`x' p_`x'
-		
-		rename *_`x'? *
-		rename *_`x' *
-
-		local x_0 "`x'"
-		if "`triple_dif'" != ""  local x_0 "DDD"
-		if "`symmetric'" != "" local x_0  "Sym. DDD"
-		if "`dd'" == "nodd" local x_0 "`x'_noDD"
-
-		gen estimate = "`x_0'"
-		
-		rename x quarter 
-
-		tempfile new_estimate 
-		save `new_estimate', replace 
-
-		cap: mkdir "$out_dir/coefs"
-		cap: import delimited "$out_dir/coefs/`as'.csv", clear
-		if _rc == 0 {
-			drop if estimate == "`x_0'"
-			append using `new_estimate'
-		}
-		
-		order estimate quarter b p lo hi se 
-
-		export delimited "$out_dir/coefs/`as'.csv", replace 
-		use `to_write', clear 
-	}
 end 
 
 
