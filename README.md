@@ -22,19 +22,12 @@ See [site](https://dballaelliott.github.io/esplot) for introduction and overview
 
 Type `help esplot` after installation for internal stata help documentation.
 
-### Coming soon
+### Known Bugs & Change Log 
 
-Currently `esplot` works only in a panel setting (i.e. your data must be `tsset`).
-Indeed, the panel structure is what makes `esplot` a convenient command for researchers looking
-to avoid having to reshape or otherwise prepare the data. This is particularly helpful when individuals
-can have multiple events or if there are multiple *types* of events that the researcher would like to compare.
 
-I am working on adding support to more general settings. **I am currently adding support for settings in which the researcher has already defined a `event time` variable.**
-This would allow `esplot` to be used in a repeated cross-section or other non-panel settings. 
+**`esplot` 0.9.1 (Feb 26/2021).** Adds support for alternate syntax when data cannot be `tsset` (i.e. are not panel data). 
 
-#### Known Bugs
-
-The error code `variable b_0 not found` is thrown when [variable abbreviation is disabled]. **The bug is fixed as of `esplot` 0.8.5 (Feb 1/2021).**
+**This bug is fixed as of `esplot` 0.8.5 (Feb 1/2021).** The error code `variable b_0 not found` is thrown when variable abbreviation is disabled. 
 
 ### For users of older versions of Stata
 
