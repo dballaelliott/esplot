@@ -530,7 +530,7 @@ foreach x of local by_groups{
 	
 	/* todo: let people pass whatever they want to ci and est opts, including suboptions */
 	if "`est_plot'" == "line"{
-		local b_to_plot `"line b_`x' `t', lcolor(`"`color_id'"')"'
+    local b_to_plot `"line b_`x' `t', lcolor(`"`color_id'"')"'
 	}
 	else if "`est_plot'" == "scatter" | "`est_plot'" == "" {
 		local b_to_plot `"scatter b_`x' `t', mcolor(`"`color_id'"')"'

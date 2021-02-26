@@ -29,11 +29,12 @@ Indeed, the panel structure is what makes `esplot` a convenient command for rese
 to avoid having to reshape or otherwise prepare the data. This is particularly helpful when individuals
 can have multiple events or if there are multiple *types* of events that the researcher would like to compare.
 
-I am working on adding support to more general settings. **In particular, I am looking
-to add support for settings in which the researcher has already defined a `event time` variable.**
-This would allow `esplot` to be used in a repeated cross-section or other non-panel settings.
+I am working on adding support to more general settings. **I am currently adding support for settings in which the researcher has already defined a `event time` variable.**
+This would allow `esplot` to be used in a repeated cross-section or other non-panel settings. 
 
-Interested users should flag this as an issue, otherwise adding this functionality will remain a medium to long-term goal.
+#### Known Bugs
+
+**This bug is fixed as of `esplot` 0.8.5 (Feb 1/2021).** The error code `variable b_0 not found` is thrown when variable abbreviation is disabled. 
 
 ### For users of older versions of Stata
 
