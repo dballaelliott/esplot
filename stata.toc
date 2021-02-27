@@ -1,6 +1,6 @@
-v 0.8.5
+v 0.9.2
 
-d binscatter module to generate binned scatterplots
+d esplot: event study plots.
 d Dylan Balla-Elliott, Harvard Business School
 
 p esplot. event-study plots.

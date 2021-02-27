@@ -1,4 +1,4 @@
-/*! v 0.9.1 26feb2021 Dylan Balla-Elliott, dballaelliott@gmail.com */
+/*! v 0.9.2 27feb2021 Dylan Balla-Elliott, dballaelliott@gmail.com */
 
 program define esplot, eclass sortpreserve
 
@@ -287,7 +287,8 @@ if !missing("`save_sample'"){
 }
 
 /* if we have event time, then that's our event */
-local event_name "`e_t'"
+if missing("`event_name'")  local event_name "`e_t'"
+
 if $esplot_nolog{
 	ES_graph `y', event(`event_name') `pass_by' compare(`compare_name') `pass_window' /// 
 	`estimate_reference' `difference' period_length(`period_length') `colors' `est_plot' `ci_plot' `legend' `wildcard_options' `recenter' 

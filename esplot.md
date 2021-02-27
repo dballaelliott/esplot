@@ -1,4 +1,4 @@
-_version 0.9.1_
+_version 0.9.2_
 
 # esplot {hline 2} event study plots
 
