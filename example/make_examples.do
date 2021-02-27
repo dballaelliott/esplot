@@ -3,7 +3,7 @@ discard
 
 adopath ++ "../"
 
-net install allston, from("https://raw.githubusercontent.com/dballaelliott/allston/master/")
+net install allston, from("https://raw.githubusercontent.com/dballaelliott/allston/master/") replace 
 
 set scheme aurora
 

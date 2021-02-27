@@ -19,3 +19,4 @@ test.do
 esplot.pkg 
 stata.toc
 .vscode/settings.json
+example/debug_esplot.log
