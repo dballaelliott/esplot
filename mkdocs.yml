@@ -7,7 +7,7 @@ repo_name: dballaelliott/esplot
 nav:
   - 'index.md'
   - 'options.md'
-  - 'event_study_intro.md'
+  # - 'event_study_intro.md'
   # - 'coming_soon.md'
 
 markdown_extensions:
