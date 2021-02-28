@@ -271,6 +271,8 @@ if "`save_compare'`save_event'" == "saveLatersaveLater" preserve
 cap: preserve
 assert _rc == 621
 
+tempfile regression_results 
+
 if "`regression'" == "reghdfe"{
 	$esplot_quietly reghdfe `y' `leads' `lags' `endpoints' `controls' `if' `in' `reg_weights', `main_absorb' `vce'
 }
@@ -278,6 +280,9 @@ else if "`regression'" == "bsqreg"{
 	if !missing("`vce'") di "Warning: option `vce' ignored with quantile regression"
 	$esplot_quietly bsqreg `y' `leads' `lags' `endpoints' `controls' `qreg_fe' `if' `in' `reg_weights',  quantile(`q')
 }
+
+$esplot_quietly estimates save `regression_results'
+
 if !missing("`save_sample'"){
 	/* confirm we can make the variable */
 	replace `save_sample' = e(sample)
@@ -318,6 +323,9 @@ if !missing("`save_sample'"){
 
 	keep `save_sample_vars_to_keep'
 }
+
+* expose the regression results to the user 
+$esplot_quietly estimates use `regression_results'
 end
 
 
