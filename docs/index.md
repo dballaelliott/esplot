@@ -74,4 +74,13 @@ Additionally, `esplot` appropriately handles sources of common mistakes when man
 
 <!-- (hint: we should then have an individual ID and a time index (e.g. month, day, minute)) -->
 
+## Advanced 
+
+#### Accessing Regression Output 
+
+In `esplot 0.9.3`  (March, 2021) and later, the internal `reghdfe` call is made available to be user. Typing `estimates` after `esplot` is done running will print the regression output and save the return objects to `e()` and `r()`. This allows `esplot` estimates to be used with post-estimation commands, like `test` and `eststo`/`esttab`. 
+
+See `help reghdfe` for more information on the information that is returned.  
+
+Note that because of the technical implementation, the estimates are stored and then reloaded; this means that `e(sample)` cannot be used (see `help estimates use` for more information.) The `save_sample` option is provided as a workaround. 
 
