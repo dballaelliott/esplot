@@ -34,9 +34,8 @@ syntax varlist(max=2) [if] [in] [fweight pweight aweight/], ///
 # delimit cr
 
 if "$esplot_nolog" == "" global esplot_nolog 1
-if $esplot_nolog == 1 global esplot_quietly "quietly :"
 
-if "$esplot_quietly" == "" global esplot_quietly "quietly :"
+if $esplot_nolog == 1 | missing("$esplot_quietly") global esplot_quietly "quietly :"
 else global esplot_quietly
 
 local wildcard_options `options'
@@ -298,10 +297,15 @@ else{
 }
 
 if "`savedata'" != ""{
-	keep $ESPLOT_TIME_VAR lo_* hi_* b_* p_* se_*
-	rename $ESPLOT_TIME_VAR t 
+	keep lo_* hi_* b_* p_* se_*
+
+	local periods = floor(abs(`first_period')/`period_length') + floor(`last_period'/`period_length') + 1
+ 	gen t= _n - abs(floor(`first_period'/`period_length')) - 1 if _n <= `periods' 
+	
 	if `period_length' > 1 label var t "Time (averaging over `period_length' periods)"
 	else label var t "Time"
+
+	drop if missing(t)
 	/* see if replace is specified */
 	tokenize `"`savedata'"', parse(",")
 	if "`3'" != "" save `1' , `3'
@@ -463,8 +467,7 @@ $esplot_quietly drop in 1 //drop the initial 0 in all the matrices
 local periods = floor(abs(`first_period')/`period_length') + floor(`last_period'/`period_length') + 1
 *x values
 tempvar t 
-global ESPLOT_TIME_VAR `t'
-$esplot_quietly gen `t' = _n - abs(floor(`first_period'/`period_length')) - 1 if _n <= `periods' 
+quietly: gen `t' = _n - abs(floor(`first_period'/`period_length')) - 1 if _n <= `periods' 
 label variable `t' "event time"
 
 foreach x of local by_groups{
