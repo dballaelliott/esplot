@@ -6,6 +6,9 @@ labels: bug
 assignees: ''
 
 ---
+**Before opening an issue, please run `ado update esplot, update` to make sure you are running the most up-to-date version of the package!**
+
+Since `esplot` is in active development, I ship bugfixes relatively frequently, and it's possible that someone else has already run into your problem. If not, please leave an issue and I'll see what I can do!  
 
 **Describe the bug**
 A clear and concise description of what the bug is & what you were trying to do. 
