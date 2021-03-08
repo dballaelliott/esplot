@@ -1,4 +1,4 @@
-/*! v 0.9.4 5mar2021 Dylan Balla-Elliott, dballaelliott@gmail.com */
+/*! v 0.9.5 8mar2021 Dylan Balla-Elliott, dballaelliott@gmail.com */
 
 /* 
 MIT License:
@@ -47,7 +47,7 @@ syntax varlist(max=2) [if] [in] [fweight pweight aweight/], ///
 		tolerance(passthru) /// 
 
 	/**START DISPLAY OPTIONS */
-	Window(numlist max=2 min=2 integer ascending) ///
+	Window(string) ///
 	PERIOD_length(integer 1) /// 
 	COLors(passthru) ///
 	est_plot(passthru) ci_plot(passthru) ///
@@ -66,9 +66,32 @@ else global esplot_quietly
 
 local wildcard_options `options'
 
+
 /*****************************************************
 		Initial checks and warnings
 *****************************************************/
+/* process window and suboptions */
+local window_raw `window'
+tokenize `: subinstr local window_raw "," "|" ', parse("|")
+local window `1'
+** check the numlist
+cap: numlist "`window'", ascending integer max(2) min(2)
+if _rc != 0 {
+	di as error "window() invalid -- invalid numlist. See error code for more information."
+	exit _rc 
+}
+local window_option `3'
+if !inlist("`window_option'","bin_pre","bin_post","bin", "saturate"){
+	di as error "`window_option' is not a valid {bf:window} suboption. Try {it:bin} or {it:saturate}"
+	
+	cap: confirm number `window_option'
+	** if it's numeric, they may have put a comma between the windows 
+	if _rc == 0 {
+		di "you might have typed window(pre, post); I read this as window(pre post [,suboptions]) and got confused." 
+	}
+	exit 198
+}
+
 /* process quantile regression */
 if `quantile' == -1 {
 	local regression reghdfe
@@ -108,6 +131,7 @@ if !missing("`save_sample'"){
 	qui: ds
 	local save_sample_vars_to_keep = r(varlist)
 } 
+
 /* pull out outcome */
 local y: word 1 of `varlist'
 local e_t: word 2 of `varlist'
@@ -278,10 +302,23 @@ foreach ev of local ev_list{
 		else local F_absorb " `F_absorb' F`j'_``ev'_name'"
 	}
 
+	if inlist("`window_option'","bin_pre","bin") {
+		di "binning pre period"
+		egen F_end_``ev'_name' = rowmax(`F_absorb')
+		local F_absorb F_end_``ev'_name'
+	}
+
+	if inlist("`window_option'","bin_post","bin"){
+		di "binning post period "
+		egen L_end_``ev'_name' = rowmax(`L_absorb')
+		local L_absorb L_end_``ev'_name'
+	}
 	
 	if "`by'" == "" local endpoints "`endpoints' `F_absorb' `L_absorb'"
 	else local endpoints "`endpoints' i.`by'#(`F_absorb' `L_absorb')"
 	
+	di "`endpoints'"
+	pause 
 	/* just save if we said to save, not to save later 
 		(this is because if both passed save, it'll try to preserve twice,
 		so we switch to "saveLater" if both pass save)
@@ -300,7 +337,12 @@ assert _rc == 621
 tempfile regression_results 
 
 if "`regression'" == "reghdfe"{
+<<<<<<< HEAD
+	pause 
+	$esplot_quietly reghdfe `y' `leads' `lags' `endpoints' `controls' `if' `in' `reg_weights', `main_absorb' `vce'
+=======
 	$esplot_quietly reghdfe `y' `leads' `lags' `endpoints' `controls' `if' `in' `reg_weights', `main_absorb' `vce' `tolerance'
+>>>>>>> e1e8dc02683bbd7ff4783744404d303824d3e22f
 }
 else if "`regression'" == "bsqreg"{
 	if !missing("`vce'") di "Warning: option `vce' ignored with quantile regression"
