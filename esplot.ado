@@ -1,4 +1,4 @@
-/*! v 0.9.4 8mar2021 Dylan Balla-Elliott, dballaelliott@gmail.com */
+/*! v 0.9.5 8mar2021 Dylan Balla-Elliott, dballaelliott@gmail.com */
 
 /* 
 MIT License:
@@ -44,6 +44,7 @@ syntax varlist(max=2) [if] [in] [fweight pweight aweight/], ///
 	
 	/** START REGRESSION OPTIONS **/
 	CONTROLs(varlist fv ts) absorb(passthru) vce(passthru) /// 
+		tolerance(passthru) /// 
 
 	/**START DISPLAY OPTIONS */
 	Window(string) ///
@@ -336,8 +337,12 @@ assert _rc == 621
 tempfile regression_results 
 
 if "`regression'" == "reghdfe"{
+<<<<<<< HEAD
 	pause 
 	$esplot_quietly reghdfe `y' `leads' `lags' `endpoints' `controls' `if' `in' `reg_weights', `main_absorb' `vce'
+=======
+	$esplot_quietly reghdfe `y' `leads' `lags' `endpoints' `controls' `if' `in' `reg_weights', `main_absorb' `vce' `tolerance'
+>>>>>>> e1e8dc02683bbd7ff4783744404d303824d3e22f
 }
 else if "`regression'" == "bsqreg"{
 	if !missing("`vce'") di "Warning: option `vce' ignored with quantile regression"
