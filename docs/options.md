@@ -54,9 +54,15 @@
         `bin_post`
         :   Define an indicator for $j >$ end, but use all possible pre-event relative time indicators for estimation. 
 
-        Further reading: 
+        **Further reading**
 
-        There is a very active applied econometric literature concerning the correct specification of event-study estimates. [Borusyak & Jaravel, 2018](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2826228) argue that the fully saturated model is most robust to long run pre- and post- trends, since it does not impose a parametric assumption on dynamic effects before/after a given period. [Schmidheiny & Siegloch, 2020](https://hdl.handle.net/10419/215676) show that imposing the structure implied by binning (i.e. that effects are constant before/after some periods) can improve identification of time fixed effects.  [Baker, Larcker, & Wang, 2021](https://dx.doi.org/10.2139/ssrn.3794018) show that switching between the binned and saturated models can lead to substantively different estimates, especially in the presence of pre-trends.
+        There is a very active applied econometric literature concerning the correct specification of event-study estimates. 
+
+        [Baker, Larcker, & Wang, 2021](https://dx.doi.org/10.2139/ssrn.3794018) show that binned and saturated models can lead to substantively different estimates, especially in the presence of pre-trends. `esplot` therefore makes both options available to users.
+
+        It uses the fully saturated model as the default since this enforces the least structure on the research design. [Borusyak & Jaravel, 2018](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2826228) argue that the fully saturated model is most robust to long run pre- and post- trends, since it does not impose a parametric assumption on dynamic effects before/after a given period.  
+
+        Researchers are then, of course, free to impose that structure as a design choice with any of the three variants of the window sub-options. [Schmidheiny & Siegloch, 2020](https://hdl.handle.net/10419/215676) show that imposing the structure implied by binning (i.e. that effects are constant before/after some periods) can improve identification of time fixed effects. 
 
 
 
