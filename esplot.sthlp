@@ -1,5 +1,5 @@
 {smcl}
-{it:version 0.9.2}
+{it:version 0.9.5}
 
 {title:esplot {hline 2} event study plots}
 
@@ -42,6 +42,21 @@
 {p 8 8 2} {bf:nogen} this vector tells {it:esplot} that the vector of relative-time indicators around this particular event already exist (probably after being created by an earlier call to {it:esplot} with the {it:save} option.)    {break}
 
 {p 8 8 2} {bf:replace} allows {it:esplot} to write over the existing vector of relative-time indicators (rarely used.)    {break}
+
+{p 4 4 2}
+{bf:window(start end [, options])}  display dynamic effect estimates (event-time coefficents) ranging from {it:start} to {it:end}. {it:start} should be less than zero; {it:end} should be greater than zero. 
+
+{p 8 8 2} {bf:window} recognizes four suboptions that control how endpoints (i.e. periods {it:outside} the window) should be treated. By default, {it:esplot} will fully saturate the model with relative time indicators for every possible period, except for the omitted period (t = -1). The {bf:bin}, {bf:bin_pre}, and {bf:bin_post} cause endpoints to be binned; see below for more information.
+
+{p 4 4 2}{it:endpoint suboptions (for window)}
+
+{p 8 8 2} {bf:saturate} default option, equivalent to typing nothing. {bf:esplot} will find the maximum and minimum relative time periods supported in the data (i.e. the last period in the data minus the earliest event, and the first period in the data minus the latest event.) Then {bf:esplot} will fully saturate the model will all possible relative time periods. Some of these coefficients may not be well identified (some may even drop out).
+
+{p 8 8 2} {bf:bin} Define an indicator for {it:j} < start and an indicator for {it:j} > end, where {it:j} is relative time. Rather than including all possible event-time indicators, we "bin" all event-time indicators before/after the window starts/ends. Thus, rather than estimating the full set of dynamic effects, we estimate dynamic effects only within the specified window, and estimate (but do not plot) constant long-run effects before and after the window.    {break}
+
+{p 8 8 2} {bf:bin_pre} Define an indicator for {it:j} < start, but use all possible post-event relative time indicators for estimation.    {break}
+
+{p 8 8 2} {bf:bin_post} Define an indicator for {it:j} > end, but use all possible pre-event relative time indicators for estimation.    {break}
 
 {p 4 4 2}
 {bf:by(varname)} estimate coefficents seperately for each level of {it:by}. For example, {it:esplot wage years_since_policy, by(education)} will estimate the event-time coefficients for the relative time given in {it:years_since_policy} seperately for each level of {it:education} and plot as many series as there are levels of education. 
@@ -125,7 +140,22 @@ More complicated options are discussed below.    {break}
 
 {p 8 8 2} - if an earlier {bf:esplot} call used {bf:save}, and you now wish to use {bf:estimate_reference} (or vice versa). Since, {bf:esplot} only keeps the lags and leads that it needs, if {bf:save} is used without {bf:estimate_reference}, then the necessary leads for the omitted periods will not be saved. (Example 3)
 
-{p 4 4 2}{it:Examples with save, replace, and nogen}
+{p 4 4 2}{bf:Further reading on binned v.s. full saturated models}
+
+{p 4 4 2}
+There is a very active applied econometric literature concerning the correct specification of event-study estimates. 
+
+{p 4 4 2}
+{browse "https://dx.doi.org/10.2139/ssrn.3794018":Baker, Larcker, & Wang, 2021} show that binned and saturated models can lead to substantively different estimates, especially in the presence of pre-trends. {bf:esplot} therefore makes both options available to users.
+
+{p 4 4 2}
+It uses the fully saturated model as the default since this enforces the least structure on the research design.  {browse "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2826228":Borusyak & Jaravel, 2018} argue that the fully saturated model is most robust to long run pre- and post- trends, since it does not impose a parametric assumption on dynamic effects before/after a given period.    {break}
+
+{p 4 4 2}
+Researchers are then, of course, free to impose that structure as a design choice with any of the three variants of the window sub-options.  {browse "https://hdl.handle.net/10419/215676":Schmidheiny & Siegloch, 2020} show that imposing the structure implied by binning (i.e. that effects are constant before/after some periods) can improve identification of time fixed effects. 
+
+
+{p 4 4 2}{bf:Examples with save, replace, and nogen}
 
 {p 4 4 2}
 {bf:Example 1}    {break}

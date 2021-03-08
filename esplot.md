@@ -1,4 +1,4 @@
-_version 0.9.2_
+_version 0.9.5_
 
 # esplot {hline 2} event study plots
 
@@ -38,6 +38,20 @@ __compare(<event_indicator> [, options])__ _Only available when using the event(
 > __nogen__ this vector tells _esplot_ that the vector of relative-time indicators around this particular event already exist (probably after being created by an earlier call to _esplot_ with the _save_ option.)  
 
 > __replace__ allows _esplot_ to write over the existing vector of relative-time indicators (rarely used.)  
+
+__window(start end [, options])__  display dynamic effect estimates (event-time coefficents) ranging from _start_ to _end_. _start_ should be less than zero; _end_ should be greater than zero. 
+
+> __window__ recognizes four suboptions that control how endpoints (i.e. periods _outside_ the window) should be treated. By default, _esplot_ will fully saturate the model with relative time indicators for every possible period, except for the omitted period (t = -1). The __bin__, __bin_pre__, and __bin_post__ cause endpoints to be binned; see below for more information.
+ 
+#### endpoint suboptions (for window)
+
+> __saturate__ default option, equivalent to typing nothing. __esplot__ will find the maximum and minimum relative time periods supported in the data (i.e. the last period in the data minus the earliest event, and the first period in the data minus the latest event.) Then __esplot__ will fully saturate the model will all possible relative time periods. Some of these coefficients may not be well identified (some may even drop out).
+  
+> __bin__ Define an indicator for _j_ < start and an indicator for _j_ > end, where _j_ is relative time. Rather than including all possible event-time indicators, we "bin" all event-time indicators before/after the window starts/ends. Thus, rather than estimating the full set of dynamic effects, we estimate dynamic effects only within the specified window, and estimate (but do not plot) constant long-run effects before and after the window.  
+
+> __bin_pre__ Define an indicator for _j_ < start, but use all possible post-event relative time indicators for estimation.  
+  
+> __bin_post__ Define an indicator for _j_ > end, but use all possible pre-event relative time indicators for estimation.  
 
 __by(varname)__ estimate coefficents seperately for each level of _by_. For example, _esplot wage years_since_policy, by(education)_ will estimate the event-time coefficients for the relative time given in _years_since_policy_ seperately for each level of _education_ and plot as many series as there are levels of education. 
 
@@ -103,7 +117,18 @@ __event__ and __compare__ have the sub-options __save__, __nogen__, and __replac
 
 > - if an earlier __esplot__ call used __save__, and you now wish to use __estimate_reference__ (or vice versa). Since, __esplot__ only keeps the lags and leads that it needs, if __save__ is used without __estimate_reference__, then the necessary leads for the omitted periods will not be saved. (Example 3)
 
-#### Examples with save, replace, and nogen
+### Further reading on binned v.s. full saturated models
+
+There is a very active applied econometric literature concerning the correct specification of event-study estimates. 
+
+[Baker, Larcker, & Wang, 2021](https://dx.doi.org/10.2139/ssrn.3794018) show that binned and saturated models can lead to substantively different estimates, especially in the presence of pre-trends. __esplot__ therefore makes both options available to users.
+
+It uses the fully saturated model as the default since this enforces the least structure on the research design. [Borusyak & Jaravel, 2018](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2826228) argue that the fully saturated model is most robust to long run pre- and post- trends, since it does not impose a parametric assumption on dynamic effects before/after a given period.  
+
+Researchers are then, of course, free to impose that structure as a design choice with any of the three variants of the window sub-options. [Schmidheiny & Siegloch, 2020](https://hdl.handle.net/10419/215676) show that imposing the structure implied by binning (i.e. that effects are constant before/after some periods) can improve identification of time fixed effects. 
+
+
+### Examples with save, replace, and nogen
 
 __Example 1__  
 /* event lags and leads are saved */  
