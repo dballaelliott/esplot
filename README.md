@@ -24,6 +24,8 @@ Type `help esplot` after installation for internal stata help documentation.
 
 ### New Features
 
+As of **`esplot` 0.9.0**, leads and lags outside of the specified `window` are estimated, but not displayed. **This is a change to the default; in earlier versions, periods outside the window were binned together.** The old functionality is available by specifying the suboption `bin` to window with `window(start end, bin)`. But think before you bin! This forces the dynamic effects to be constant outside of the specified window. If you're comfortable with that restriction, it can help with the identification of time fixed effects, but if this assumption is violated, it can cause the dynamic effects _within the window_ to be misidentified. See the [docs](https://dballaelliott.github.io/esplot/options/#general-options) for more information on these suboptions.  
+
 **`esplot` 0.9.5 (early March 2021).** Lets users specify `saturate` or `bin` to control how endpoints are treated.   
 **`esplot` 0.9.1 (late Feb 2021).** Adds support for alternate syntax when data cannot be `tsset` (i.e. are not panel data).  
 **`esplot` 0.7.1 (late Nov 2020).** Adds support for quantile regression.  
