@@ -18,5 +18,9 @@ test.do
 # ignore package info 
 esplot.pkg 
 stata.toc
-.vscode/settings.json
 example/debug_esplot.log
+
+# ignore additional program/OS settings
+.DS_Store
+.vscode/settings.json
+

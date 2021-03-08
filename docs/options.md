@@ -36,6 +36,30 @@
             esplot income, event(treatment, save)       // saves indicators...
             esplot ln_income, event(treatment, nogen)   // use saved indicators 
 
+`window(start end [, options])`
+:   display dynamic effect estimates (event-time coefficents) ranging from `start` to `end`. `start` should be less than zero; `end` should be greater than zero. `window` recognizes four suboptions that control how endpoints (i.e. periods *outside* the window) should be treated. By default, `esplot` will fully saturate the model with relative time indicators for every possible period, except for the omitted period (t = -1). The `bin`, `bin_pre`, and `bin_post` cause endpoints to be binned; see below for more information.
+ 
+    ??? info "endpoint suboptions (for window)"  
+        `saturate`
+        :   default option, equivalent to typing nothing. `esplot` will find the maximum and minimum relative time periods supported in the data (i.e. the last period in the data minus the earliest event, and the first period in the data minus the latest event.) Then `esplot` will fully saturate the model will all possible relative time periods. Some of these coefficients may not be well identified (some may even drop out).
+
+        `bin`
+        :   Define an indicator for $j <$ start and an indicator for $j >$ end, where $j$ is relative time. Rather than including all possible event-time indicators, we "bin" all event-time indicators before/after the window starts/ends. Thus, rather than estimating the full set of dynamic effects, we estimate dynamic effects only within the specified window, and estimate (but do not plot) constant long-run effects before and after the window. 
+
+        `bin_pre`
+        :   Define an indicator for $j <$ start, but use all possible post-event relative time indicators for estimation. 
+
+        `bin_post`
+        :   Define an indicator for $j >$ end, but use all possible pre-event relative time indicators for estimation. 
+
+        Further reading: 
+
+        There is a very active applied econometric literature concerning the correct specification of event-study estimates. [Borusyak & Jaravel, 2018](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2826228) argue that the fully saturated model is most robust to long run pre- and post- trends, since it does not impose a parametric assumption on dynamic effects before/after a given period. [Baker, Larcker, & Wang, 2021](http://dx.doi.org/10.2139/ssrn.3794018) show that switching between the binned and saturated models can lead to substantively different estimates. [Schmidheiny & Siegloch, 2020](http://hdl.handle.net/10419/215676) show that imposing the structure implied by binning (i.e. that effects are constant before/after some periods) can improve identification of time fixed effects.
+
+
+
+
+
 `by(varname)`
 :   estimate coefficents seperately for each level of `by`. For example, `esplot wage years_since_policy, by(education)` will estimate the event-time coefficients for the relative time given in `years_since_policy` seperately for each level of `education` and plot as many series as there are levels of education. 
 
@@ -70,9 +94,6 @@
 weights are allowed when using OLS (default), but not when `quantile` is specified. 
 
 ### Display Options 
-
-`window(start end)`
-:   display dynamic effect estimates (event-time coefficents) ranging from `start` to `end`. `start` should be less than zero; `end` should be greater than zero. 
 
 `period_length(integer)` 
 :   pool dynamic effect coefficients in groups of `period_length` before plotting. 
