@@ -6,6 +6,7 @@ get_data.do
 
 #ignore logs
 logs/*/*
+tests/*
 
 # ignore data
 *.dta 

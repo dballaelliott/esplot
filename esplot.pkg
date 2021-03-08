@@ -1,8 +1,8 @@
-v 0.9.5
+v 0.9.6
 
 d esplot: event study plots
 d Dylan Balla-Elliott, Harvard Business School
-d Distribution-Date: 8mar 2021
+d Distribution-Date: 9mar 2021
 
 f esplot.ado
 f esplot.sthlp

@@ -1,4 +1,4 @@
-/*! v 0.9.5 8mar2021 Dylan Balla-Elliott, dballaelliott@gmail.com */
+/*! v 0.9.6 9mar2021 Dylan Balla-Elliott, dballaelliott@gmail.com */
 
 /* 
 MIT License:
@@ -81,7 +81,9 @@ if _rc != 0 {
 	exit _rc 
 }
 local window_option `3'
-if !inlist("`window_option'","bin_pre","bin_post","bin", "saturate"){
+if !inlist("`window_option'","bin_pre","bin_post","bin", "saturate") ///
+	& !missing("`window_option'") {
+
 	di as error "`window_option' is not a valid {bf:window} suboption. Try {it:bin} or {it:saturate}"
 	
 	cap: confirm number `window_option'
@@ -303,22 +305,18 @@ foreach ev of local ev_list{
 	}
 
 	if inlist("`window_option'","bin_pre","bin") {
-		di "binning pre period"
-		egen F_end_``ev'_name' = rowmax(`F_absorb')
+		$esplot_quietly egen F_end_``ev'_name' = rowmax(`F_absorb')
 		local F_absorb F_end_``ev'_name'
 	}
 
 	if inlist("`window_option'","bin_post","bin"){
-		di "binning post period "
-		egen L_end_``ev'_name' = rowmax(`L_absorb')
+		$esplot_quietly egen L_end_``ev'_name' = rowmax(`L_absorb')
 		local L_absorb L_end_``ev'_name'
 	}
 	
 	if "`by'" == "" local endpoints "`endpoints' `F_absorb' `L_absorb'"
 	else local endpoints "`endpoints' i.`by'#(`F_absorb' `L_absorb')"
 	
-	di "`endpoints'"
-	pause 
 	/* just save if we said to save, not to save later 
 		(this is because if both passed save, it'll try to preserve twice,
 		so we switch to "saveLater" if both pass save)
@@ -337,12 +335,7 @@ assert _rc == 621
 tempfile regression_results 
 
 if "`regression'" == "reghdfe"{
-<<<<<<< HEAD
-	pause 
-	$esplot_quietly reghdfe `y' `leads' `lags' `endpoints' `controls' `if' `in' `reg_weights', `main_absorb' `vce'
-=======
 	$esplot_quietly reghdfe `y' `leads' `lags' `endpoints' `controls' `if' `in' `reg_weights', `main_absorb' `vce' `tolerance'
->>>>>>> e1e8dc02683bbd7ff4783744404d303824d3e22f
 }
 else if "`regression'" == "bsqreg"{
 	if !missing("`vce'") di "Warning: option `vce' ignored with quantile regression"
