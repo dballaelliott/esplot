@@ -22,12 +22,11 @@ See [site](https://dballaelliott.github.io/esplot) for introduction and overview
 
 Type `help esplot` after installation for internal stata help documentation.
 
-### Known Bugs & Change Log 
+### New Features
 
-
-**`esplot` 0.9.1 (Feb 26/2021).** Adds support for alternate syntax when data cannot be `tsset` (i.e. are not panel data). 
-
-**This bug is fixed as of `esplot` 0.8.5 (Feb 1/2021).** The error code `variable b_0 not found` is thrown when variable abbreviation is disabled. 
+**`esplot` 0.9.5 (early March 2021).** Lets users specify `saturate` or `bin` to control how endpoints are treated.   
+**`esplot` 0.9.1 (late Feb 2021).** Adds support for alternate syntax when data cannot be `tsset` (i.e. are not panel data).  
+**`esplot` 0.7.1 (late Nov 2020).** Adds support for quantile regression.  
 
 ### For users of older versions of Stata
 
