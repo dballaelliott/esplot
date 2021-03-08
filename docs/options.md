@@ -37,7 +37,9 @@
             esplot ln_income, event(treatment, nogen)   // use saved indicators 
 
 `window(start end [, options])`
-:   display dynamic effect estimates (event-time coefficents) ranging from `start` to `end`. `start` should be less than zero; `end` should be greater than zero. `window` recognizes four suboptions that control how endpoints (i.e. periods *outside* the window) should be treated. By default, `esplot` will fully saturate the model with relative time indicators for every possible period, except for the omitted period (t = -1). The `bin`, `bin_pre`, and `bin_post` cause endpoints to be binned; see below for more information.
+:   display dynamic effect estimates (event-time coefficents) ranging from `start` to `end`. `start` should be less than zero; `end` should be greater than zero. 
+
+:   `window` recognizes four suboptions that control how endpoints (i.e. periods *outside* the window) should be treated. By default, `esplot` will fully saturate the model with relative time indicators for every possible period, except for the omitted period (t = -1). The `bin`, `bin_pre`, and `bin_post` cause endpoints to be binned; see below for more information.
  
     ??? info "endpoint suboptions (for window)"  
         `saturate`
@@ -54,7 +56,7 @@
 
         Further reading: 
 
-        There is a very active applied econometric literature concerning the correct specification of event-study estimates. [Borusyak & Jaravel, 2018](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2826228) argue that the fully saturated model is most robust to long run pre- and post- trends, since it does not impose a parametric assumption on dynamic effects before/after a given period. [Baker, Larcker, & Wang, 2021](http://dx.doi.org/10.2139/ssrn.3794018) show that switching between the binned and saturated models can lead to substantively different estimates. [Schmidheiny & Siegloch, 2020](http://hdl.handle.net/10419/215676) show that imposing the structure implied by binning (i.e. that effects are constant before/after some periods) can improve identification of time fixed effects.
+        There is a very active applied econometric literature concerning the correct specification of event-study estimates. [Borusyak & Jaravel, 2018](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2826228) argue that the fully saturated model is most robust to long run pre- and post- trends, since it does not impose a parametric assumption on dynamic effects before/after a given period. [Schmidheiny & Siegloch, 2020](https://hdl.handle.net/10419/215676) show that imposing the structure implied by binning (i.e. that effects are constant before/after some periods) can improve identification of time fixed effects.  [Baker, Larcker, & Wang, 2021](https://dx.doi.org/10.2139/ssrn.3794018) show that switching between the binned and saturated models can lead to substantively different estimates, especially in the presence of pre-trends.
 
 
 
@@ -85,7 +87,7 @@
 `absorb(varlist)`
 :   a vector of fixed effects to absorbed and not estimated in the internal regression call. `help reghdfe##absvar` for more information. 
 
-`vce(vcetype, subopt))`
+`vce(vcetype, subopt)`
 :   specify the types of standard errors computed. `help reghdfe##opt_vce` for more information. Not compatible with `quantile`.
 
 `quantile(0 < k < 100)`
