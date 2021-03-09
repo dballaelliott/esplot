@@ -2,6 +2,8 @@
 
 Event study plots are increasingly popular in applied research. `esplot` is a new command for stata allowing researchers to quickly and easily create event study plots.
 
+**Note that this package is under active development and is frequently updated.** As a result, new features are frequently added; sometimes bugs come along with these new features, but I am often able to patch them quickly when they are reported.
+
 ## Install
 
 1. Install from within stata
