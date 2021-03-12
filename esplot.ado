@@ -1,4 +1,4 @@
-/*! v 0.9.8 9mar2021 Dylan Balla-Elliott, dballaelliott@gmail.com */
+/*! v 0.9.8 12mar2021 Dylan Balla-Elliott, dballaelliott@gmail.com */
 
 /* 
 MIT License:
@@ -311,12 +311,14 @@ foreach ev of local ev_list{
 	}
 
 	if inlist("`window_option'","bin_pre","bin") {
-		$esplot_quietly egen F_end_``ev'_name' = rowmax(`F_absorb')
+		if "`replace_`ev''" == "replace" $esplot_quietly cap: drop F_end_``ev'_name'
+		if "`nogen_`ev''" == "" $esplot_quietly egen F_end_``ev'_name' = rowmax(`F_absorb')
 		local F_absorb F_end_``ev'_name'
 	}
 
 	if inlist("`window_option'","bin_post","bin"){
-		$esplot_quietly egen L_end_``ev'_name' = rowmax(`L_absorb')
+		if "`replace_`ev''" == "replace" $esplot_quietly cap: drop L_end_``ev'_name'
+		if "`nogen_`ev''" == "" $esplot_quietly egen L_end_``ev'_name' = rowmax(`L_absorb')
 		local L_absorb L_end_``ev'_name'
 	}
 	

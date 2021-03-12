@@ -1,19 +1,15 @@
 #ignore helpers
-test.do
-formal_tests.do
 log_program.ado
 get_data.do
 
 #ignore logs
 logs/*/*
-tests/*
 
 # ignore data
 *.dta 
 *.csv 
 !example/example.csv
 
-test.do
 
 
 # ignore package info 
@@ -25,3 +21,8 @@ example/debug_esplot.log
 .DS_Store
 .vscode/settings.json
 
+# ignore tests
+test.do
+formal_tests.do
+formal_tests.log
+tests/*
