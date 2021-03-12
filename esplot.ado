@@ -1,4 +1,4 @@
-/*! v 0.9.7 9mar2021 Dylan Balla-Elliott, dballaelliott@gmail.com */
+/*! v 0.9.8 9mar2021 Dylan Balla-Elliott, dballaelliott@gmail.com */
 
 /* 
 MIT License:
@@ -77,11 +77,15 @@ local window_raw `window'
 tokenize `: subinstr local window_raw "," "|" ', parse("|")
 local window `1'
 ** check the numlist
-cap: numlist "`window'", ascending integer max(2) min(2)
-if _rc != 0 {
-	di as error "window() invalid -- invalid numlist. See error code for more information."
-	exit _rc 
-}
+if !missing(`"`window'"'){
+	cap: numlist "`window'", ascending integer max(2) min(2)
+	
+	if _rc != 0 {
+		di as error "window() invalid -- invalid numlist. See error code for more information."
+		exit _rc 
+	}
+} 
+
 local window_option `3'
 if !inlist("`window_option'","bin_pre","bin_post","bin", "saturate") ///
 	& !missing("`window_option'") {
