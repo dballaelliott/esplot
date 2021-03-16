@@ -10,7 +10,7 @@
 
 2. or with an event indicator (on panel data):
 
-    `esplot <outcome>, event(<event_indicator> [, options])`
+    `esplot <outcome>, event(<event_indicator> [, suboptions]) [options]`
 
 ## Options 
 
