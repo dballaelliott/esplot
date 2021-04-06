@@ -1,4 +1,4 @@
-/*! v 0.9.8 12mar2021 Dylan Balla-Elliott, dballaelliott@gmail.com */
+*! v 0.9.9 12mar2021 Dylan Balla-Elliott, dballaelliott@gmail.com *
 
 /* 
 MIT License:
