@@ -1,4 +1,4 @@
-*! v 0.9.9 12mar2021 Dylan Balla-Elliott, dballaelliott@gmail.com *
+*! v 0.9.10 6apr2021 Dylan Balla-Elliott, dballaelliott@gmail.com *
 
 /* 
 MIT License:
@@ -595,6 +595,19 @@ local legend_info
 
 gr_setscheme
 
+* gray out if we're using stata earlier than 14 
+if c(stata_version) < 15 local transparency *.5 
+else local transparency %80*.75
+
+* gray out if we're using stata earlier than 14 
+if c(stata_version) < 15 local area_transparency *.2
+else local area_transparency %30
+
+* gray out if we're using stata earlier than 14 
+if c(stata_version) < 15 local hide *0
+else local hide %0
+
+
 foreach x of local by_groups{
 	if `plot_id' > 1{
 		local plot_command `"`plot_command' ||"' 
@@ -623,19 +636,20 @@ foreach x of local by_groups{
 
 
 	if "`ci_plot'" == "line"{
-		local ci_to_plot `"line lo_`x' hi_`x' `t', lcolor(`"`color_id'%80*.75"' `"`color_id'%80*.75"')"' // lpattern(dash)
+		local ci_to_plot `"line lo_`x' hi_`x' `t', lcolor(`"`color_id'`transparency'"' `"`color_id'`transparency'"') lpattern("`.__SCHEME.linepattern.p`plot_id'line'" "`.__SCHEME.linepattern.p`plot_id'line'")"' // lpattern(dash)
 		local legend_num = `plot_id'*3
 
 	}
-	else if "`ci_plot'" == "rcap" | "`ci_plot'" == "" {
-		local ci_to_plot `"rcap lo_`x' hi_`x' `t', lcolor(`"`color_id'%80*.75"')"'
+	else if "`ci_plot'" == "rarea" {
+		local ci_to_plot `" rarea lo_`x' hi_`x' `t', fcolor(`"`color_id'`area_transparency'"') lcolor(`"`color_id'`hide'"') "'
 		local legend_num = `plot_id'*2 
 	}
-	else {
-		if "`ci_plot'" != "rarea" di as text "Unsupported plot type for confidence intervals: " as input "`est_plot'" as text " . Using default"
-		local ci_to_plot `" rarea lo_`x' hi_`x' `t', fcolor(`"`color_id'%30"') lcolor(`"`color_id'%0"') "'
+	else  {
+		if "`ci_plot'" != "rcap" & !missing("`ci_plot'") di as text "Unsupported plot type for confidence intervals: " as input "`est_plot'" as text " . Using default"
+		local ci_to_plot `"rcap lo_`x' hi_`x' `t', lcolor(`"`color_id'`transparency'"')"'
 		local legend_num = `plot_id'*2 
 	}
+
 	
 	local new_plot " `ci_to_plot' || `b_to_plot' "
 
