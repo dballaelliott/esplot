@@ -11,6 +11,7 @@ nav:
 markdown_extensions:
   - def_list
   - pymdownx.details
+  - pymdownx.superfences
   - pymdownx.tasklist:
       custom_checkbox: true
   - pymdownx.arithmatex:
