@@ -1,4 +1,4 @@
-*! v 0.9.11 5may2021 Dylan Balla-Elliott, dballaelliott@gmail.com *
+/*! v 0.10.0 24may2021 Dylan Balla-Elliott, dballaelliott@gmail.com */
 
 /* 
 MIT License:
@@ -41,7 +41,8 @@ syntax varlist(max=2) [if] [in] [fweight pweight aweight/], ///
 	difference ///
 	SAVEdata(string asis) ///
 	recenter		///
-	
+	NOFILL /// 
+
 	/** START REGRESSION OPTIONS **/
 	CONTROLs(varlist fv ts) absorb(passthru) vce(passthru) /// 
 		tolerance(passthru) /// 
@@ -261,16 +262,21 @@ local endpoints
 local e_t_name `e_t' 
 if !missing("`e_t'") local ev_list "e_t"
 
+** can allow to specify not to fill in missings
+if missing("`nofill'") local fill_missing_with 0
+else if "`nofill'" == "nofill" local fill_missing_with .
+
 foreach ev of local ev_list{
 	//if "`nogen_`ev''" == "nogen" continue
 	if "``ev'_name'" == "" continue
 	// Make event lags..
 	forvalues i = 0/`max_delta'{
 		if !missing("`e_t'") gen L`i'_``ev'_name' = `e_t' == `i'
-		else if "`nogen_`ev''" == "" cap: gen L`i'_``ev'_name' = L`i'.``ev'_name' == 1
+		else if "`nogen_`ev''" == "" cap: gen L`i'_``ev'_name' = cond(missing(L`i'.``ev'_name'),`fill_missing_with',L`i'.``ev'_name')
+
 		if _rc == 110{
 			local old_rc _rc
-			if "`replace_`ev''" == "replace" $esplot_quietly replace L`i'_``ev'_name' = L`i'.``ev'_name' == 1
+			if "`replace_`ev''" == "replace" $esplot_quietly replace L`i'_``ev'_name' = cond(missing(L`i'.``ev'_name'),`fill_missing_with',L`i'.``ev'_name')
 			else {
 				di as error "variable  L`i'_``ev'_name' already defined."
 				di as text "Type ..." as input "`ev'(``ev'_name', replace)" as text "... if you'd like to overwrite existing lags/leads"
@@ -290,10 +296,10 @@ foreach ev of local ev_list{
 	forvalues i = -`max_delta'/`omitted_threshold'{
 		local j = abs(`i')
 		if !missing("`e_t'") gen F`j'_``ev'_name'  = `e_t' == -`j'
-		else if "`nogen_`ev''" == "" cap: gen F`j'_``ev'_name' = F`j'.``ev'_name' == 1
+		else if "`nogen_`ev''" == "" cap:  gen F`j'_``ev'_name' = cond(missing(F`j'.``ev'_name'),`fill_missing_with',F`j'.``ev'_name')
 		if _rc == 110{
 			local old_rc _rc
-			if "`replace_`ev''" == "replace" $esplot_quietly replace F`j'_``ev'_name' = F`j'.``ev'_name' == 1
+			if "`replace_`ev''" == "replace" $esplot_quietly replace F`j'_``ev'_name' = cond(missing(F`j'.``ev'_name'),`fill_missing_with',F`j'.``ev'_name')
 			else {
 				di as error "variable F`j'_``ev'_name' already defined."
 				di as text "Type ..." as input "`ev'(``ev'_name', replace)" as text "... if you'd like to overwrite existing lags/leads"
@@ -323,7 +329,7 @@ foreach ev of local ev_list{
 	}
 	
 	if "`by'" == "" local endpoints "`endpoints' `F_absorb' `L_absorb'"
-	else local endpoints "`endpoints' i.`by'#(`F_absorb' `L_absorb')"
+	else local endpoints "`endpoints' i.`by'#(c.(`F_absorb') c.(`L_absorb'))"
 	
 	/* just save if we said to save, not to save later 
 		(this is because if both passed save, it'll try to preserve twice,

@@ -1,5 +1,5 @@
 {smcl}
-{it:version 0.9.11}
+{it:version 0.10.0}
 
 {title:esplot {hline 2} event study plots}
 
