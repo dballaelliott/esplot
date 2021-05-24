@@ -10,7 +10,7 @@
 
 2. or with an event indicator (on panel data):
 
-    `esplot <outcome>, event(<event_indicator> [, options])`
+    `esplot <outcome>, event(<event_indicator> [, suboptions]) [options]`
 
 ## Options 
 
@@ -109,5 +109,18 @@ weights are allowed when using OLS (default), but not when `quantile` is specifi
 `colors(colorstylelist)`
 :   ordered list of colors; used for point estimates and confidence intervals.  
 
+    ??? note "using custom colors" 
+
+        while Stata provides a set of named colors, it is often desirable to use custom RGB codes further personalize graphics. 
+        `esplot` will correctly parse a list of quote-delimited RGB value. For example: `colors("220 114 107" "0 171 176")`. 
+        
+        If these quotes are not provided, Stata will parse each number as an entry in the list. If compound double quotes are used, the entire list will be treated as single object.
+
+        To use `colorpalette` schemes with `esplot`, simply pass the ``` `r(p)'``` object directly to the sub-option, without enclosing in quotes. For example: 
+
+        ```  
+        colorpalette HCL dark, n(2) nograph 
+        esplot y t , colors(`r(p)')   
+        ```  
 
 Additional `twoway` options can be specified and will be passed through to the internal `twoway` call. `help twoway_options`

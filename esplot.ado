@@ -1,4 +1,4 @@
-/*! v 0.10.0 12mar2021 Dylan Balla-Elliott, dballaelliott@gmail.com */
+/*! v 0.10.0 24may2021 Dylan Balla-Elliott, dballaelliott@gmail.com */
 
 /* 
 MIT License:
@@ -78,11 +78,15 @@ local window_raw `window'
 tokenize `: subinstr local window_raw "," "|" ', parse("|")
 local window `1'
 ** check the numlist
-cap: numlist "`window'", ascending integer max(2) min(2)
-if _rc != 0 {
-	di as error "window() invalid -- invalid numlist. See error code for more information."
-	exit _rc 
-}
+if !missing(`"`window'"'){
+	cap: numlist "`window'", ascending integer max(2) min(2)
+	
+	if _rc != 0 {
+		di as error "window() invalid -- invalid numlist. See error code for more information."
+		exit _rc 
+	}
+} 
+
 local window_option `3'
 if !inlist("`window_option'","bin_pre","bin_post","bin", "saturate") ///
 	& !missing("`window_option'") {
@@ -259,7 +263,7 @@ local e_t_name `e_t'
 if !missing("`e_t'") local ev_list "e_t"
 
 ** can allow to specify not to fill in missings
-if missing(`nofill') local fill_missing_with 0
+if missing("`nofill'") local fill_missing_with 0
 else if "`nofill'" == "nofill" local fill_missing_with .
 
 foreach ev of local ev_list{
@@ -268,11 +272,11 @@ foreach ev of local ev_list{
 	// Make event lags..
 	forvalues i = 0/`max_delta'{
 		if !missing("`e_t'") gen L`i'_``ev'_name' = `e_t' == `i'
-		else if "`nogen_`ev''" == "" cap: gen L`i'_``ev'_name' = cond(missing(L`i'.``ev'_name'),`fill_missing_val',L`i'.``ev'_name')
+		else if "`nogen_`ev''" == "" cap: gen L`i'_``ev'_name' = cond(missing(L`i'.``ev'_name'),`fill_missing_with',L`i'.``ev'_name')
 
 		if _rc == 110{
 			local old_rc _rc
-			if "`replace_`ev''" == "replace" $esplot_quietly replace L`i'_``ev'_name' = cond(missing(L`i'.``ev'_name'),`fill_missing_val',L`i'.``ev'_name')
+			if "`replace_`ev''" == "replace" $esplot_quietly replace L`i'_``ev'_name' = cond(missing(L`i'.``ev'_name'),`fill_missing_with',L`i'.``ev'_name')
 			else {
 				di as error "variable  L`i'_``ev'_name' already defined."
 				di as text "Type ..." as input "`ev'(``ev'_name', replace)" as text "... if you'd like to overwrite existing lags/leads"
@@ -292,10 +296,10 @@ foreach ev of local ev_list{
 	forvalues i = -`max_delta'/`omitted_threshold'{
 		local j = abs(`i')
 		if !missing("`e_t'") gen F`j'_``ev'_name'  = `e_t' == -`j'
-		else if "`nogen_`ev''" == "" cap: gen F`j'_``ev'_name' = cond(missing(F`j'.``ev'_name'),`fill_missing_val',F`j'.``ev'_name')
+		else if "`nogen_`ev''" == "" cap:  gen F`j'_``ev'_name' = cond(missing(F`j'.``ev'_name'),`fill_missing_with',F`j'.``ev'_name')
 		if _rc == 110{
 			local old_rc _rc
-			if "`replace_`ev''" == "replace" $esplot_quietly replace F`j'_``ev'_name' = cond(missing(F`j'.``ev'_name'),`fill_missing_val',F`j'.``ev'_name')
+			if "`replace_`ev''" == "replace" $esplot_quietly replace F`j'_``ev'_name' = cond(missing(F`j'.``ev'_name'),`fill_missing_with',F`j'.``ev'_name')
 			else {
 				di as error "variable F`j'_``ev'_name' already defined."
 				di as text "Type ..." as input "`ev'(``ev'_name', replace)" as text "... if you'd like to overwrite existing lags/leads"
@@ -313,17 +317,19 @@ foreach ev of local ev_list{
 	}
 
 	if inlist("`window_option'","bin_pre","bin") {
-		$esplot_quietly egen F_end_``ev'_name' = rowmax(`F_absorb')
+		if "`replace_`ev''" == "replace" $esplot_quietly cap: drop F_end_``ev'_name'
+		if "`nogen_`ev''" == "" $esplot_quietly egen F_end_``ev'_name' = rowmax(`F_absorb')
 		local F_absorb F_end_``ev'_name'
 	}
 
 	if inlist("`window_option'","bin_post","bin"){
-		$esplot_quietly egen L_end_``ev'_name' = rowmax(`L_absorb')
+		if "`replace_`ev''" == "replace" $esplot_quietly cap: drop L_end_``ev'_name'
+		if "`nogen_`ev''" == "" $esplot_quietly egen L_end_``ev'_name' = rowmax(`L_absorb')
 		local L_absorb L_end_``ev'_name'
 	}
 	
 	if "`by'" == "" local endpoints "`endpoints' `F_absorb' `L_absorb'"
-	else local endpoints "`endpoints' i.`by'#(`F_absorb' `L_absorb')"
+	else local endpoints "`endpoints' i.`by'#(c.(`F_absorb') c.(`L_absorb'))"
 	
 	/* just save if we said to save, not to save later 
 		(this is because if both passed save, it'll try to preserve twice,
@@ -416,7 +422,7 @@ syntax varlist(max=1), ///
 	**START DISPLAY OPTIONS *
 	window(numlist max=2 min=2 integer ascending) ///
 	period_length(integer 1) /// 
-	colors(namelist) ///
+	colors(string asis) ///
 	est_plot(name) ci_plot(name) ///
 	legend(string asis) * ///
 	];
@@ -595,6 +601,19 @@ local legend_info
 
 gr_setscheme
 
+* gray out if we're using stata earlier than 14 
+if c(stata_version) < 15 local transparency *.5 
+else local transparency %80*.75
+
+* gray out if we're using stata earlier than 14 
+if c(stata_version) < 15 local area_transparency *.2
+else local area_transparency %30
+
+* gray out if we're using stata earlier than 14 
+if c(stata_version) < 15 local hide *0
+else local hide %0
+
+
 foreach x of local by_groups{
 	if `plot_id' > 1{
 		local plot_command `"`plot_command' ||"' 
@@ -606,7 +625,7 @@ foreach x of local by_groups{
 	if "`color_id'" == "" {
 		if "`colors'" != "" di as error "No color found for plot `plot_id'; using default."
 
-		local color_id `.__SCHEME.color.p`plot_id''
+		local color_id "`.__SCHEME.color.p`plot_id''"
 	}
 	
 	/* todo: let people pass whatever they want to ci and est opts, including suboptions */
@@ -623,19 +642,20 @@ foreach x of local by_groups{
 
 
 	if "`ci_plot'" == "line"{
-		local ci_to_plot `"line lo_`x' hi_`x' `t', lcolor(`"`color_id'%80*.75"' `"`color_id'%80*.75"')"' // lpattern(dash)
+		local ci_to_plot `"line lo_`x' hi_`x' `t', lcolor(`"`color_id'`transparency'"' `"`color_id'`transparency'"') lpattern("`.__SCHEME.linepattern.p`plot_id'line'" "`.__SCHEME.linepattern.p`plot_id'line'")"' // lpattern(dash)
 		local legend_num = `plot_id'*3
 
 	}
-	else if "`ci_plot'" == "rcap" | "`ci_plot'" == "" {
-		local ci_to_plot `"rcap lo_`x' hi_`x' `t', lcolor(`"`color_id'%80*.75"')"'
+	else if "`ci_plot'" == "rarea" {
+		local ci_to_plot `" rarea lo_`x' hi_`x' `t', fcolor(`"`color_id'`area_transparency'"') lcolor(`"`color_id'`hide'"') "'
 		local legend_num = `plot_id'*2 
 	}
-	else {
-		if "`ci_plot'" != "rarea" di as text "Unsupported plot type for confidence intervals: " as input "`est_plot'" as text " . Using default"
-		local ci_to_plot `" rarea lo_`x' hi_`x' `t', fcolor(`"`color_id'%30"') lcolor(`"`color_id'%0"') "'
+	else  {
+		if "`ci_plot'" != "rcap" & !missing("`ci_plot'") di as text "Unsupported plot type for confidence intervals: " as input "`est_plot'" as text " . Using default"
+		local ci_to_plot `"rcap lo_`x' hi_`x' `t', lcolor(`"`color_id'`transparency'"')"'
 		local legend_num = `plot_id'*2 
 	}
+
 	
 	local new_plot " `ci_to_plot' || `b_to_plot' "
 
