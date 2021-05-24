@@ -20,6 +20,7 @@ test.do
 esplot.pkg 
 stata.toc
 example/debug_esplot.log
+formal_tests.log
 
 # ignore additional program/OS settings
 .DS_Store
