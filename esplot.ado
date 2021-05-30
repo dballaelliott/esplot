@@ -1,4 +1,4 @@
-/*! v 0.10.1 1jun2021 Dylan Balla-Elliott, dballaelliott@gmail.com */
+*! v 0.11.0 1jun2021 Dylan Balla-Elliott, dballaelliott@gmail.com *
 
 /* 
 MIT License:
@@ -35,14 +35,14 @@ syntax varlist(max=2) [if] [in] [fweight pweight aweight/], ///
 	[EVent(string asis)] /// event(varname, save nogen)
  	[ /// 
 	/** GENERAL OPTIONS **/
+	ESTimate(string asis) // parse arbitrary estimation command
 	by(varname numeric) ///
 	compare(string asis) /// compare(varname, save nogen)
 	ESTimate_reference ///
 	difference ///
 	SAVEdata(string asis) ///
 	recenter		///
-	NOFILL /// 
-
+	
 	/** START REGRESSION OPTIONS **/
 	CONTROLs(varlist fv ts) absorb(passthru) vce(passthru) /// 
 		tolerance(passthru) /// 
@@ -73,6 +73,10 @@ local wildcard_options `options'
 /*****************************************************
 		Initial checks and warnings
 *****************************************************/
+/* process advanced estimation commands */
+if !missing(`"`estimate'"') gettoken reg_type reg_opts: estimate, parse(",")
+if !missing(`"`reg_opts'"') gettoken comma reg_opts: reg_opts, parse(",")
+
 /* process window and suboptions */
 local window_raw `window'
 tokenize `: subinstr local window_raw "," "|" ', parse("|")
@@ -111,11 +115,11 @@ else if `quantile' >= 100 | `quantile' <= 0{
 }
 else if `quantile' >= 1{
 	local q = `quantile'/100
-	local regression bsqreg
+	local regression qreg
 }
 else {
 	local q = `quantile'
-	local regression bsqreg
+	local regression qreg
 }
 
 /* parse FE for quantile regression */
@@ -124,11 +128,15 @@ else local main_absorb "noabsorb"
 
 if `quantile' != -1 & !missing("`absorb'"){
 
-	local absorb_var: subinstr local absorb "absorb(" ""
-	local absorb_var: subinstr local absorb_var ")" ""
-	extract_varlist `absorb_var'
-		
-	local qreg_fe = r(varlist)
+	local absorb_vars: subinstr local absorb "absorb(" ""
+	local absorb_vars: subinstr local absorb_vars ")" ""
+	/* extract_varlist `absorb_var' */
+	
+	/* set emptycells drop */
+	
+	/* fvrevar `absorb_vars' */
+
+	local qreg_fe  `"`absorb_vars'"'
 
 
 }
@@ -262,21 +270,16 @@ local endpoints
 local e_t_name `e_t' 
 if !missing("`e_t'") local ev_list "e_t"
 
-** can allow to specify not to fill in missings
-if missing("`nofill'") local fill_missing_with 0
-else if "`nofill'" == "nofill" local fill_missing_with .
-
 foreach ev of local ev_list{
 	//if "`nogen_`ev''" == "nogen" continue
 	if "``ev'_name'" == "" continue
 	// Make event lags..
 	forvalues i = 0/`max_delta'{
 		if !missing("`e_t'") gen L`i'_``ev'_name' = `e_t' == `i'
-		else if "`nogen_`ev''" == "" cap: gen L`i'_``ev'_name' = cond(missing(L`i'.``ev'_name'),`fill_missing_with',L`i'.``ev'_name')
-
+		else if "`nogen_`ev''" == "" cap: gen L`i'_``ev'_name' = L`i'.``ev'_name' == 1
 		if _rc == 110{
 			local old_rc _rc
-			if "`replace_`ev''" == "replace" $esplot_quietly replace L`i'_``ev'_name' = cond(missing(L`i'.``ev'_name'),`fill_missing_with',L`i'.``ev'_name')
+			if "`replace_`ev''" == "replace" $esplot_quietly replace L`i'_``ev'_name' = L`i'.``ev'_name' == 1
 			else {
 				di as error "variable  L`i'_``ev'_name' already defined."
 				di as text "Type ..." as input "`ev'(``ev'_name', replace)" as text "... if you'd like to overwrite existing lags/leads"
@@ -296,10 +299,10 @@ foreach ev of local ev_list{
 	forvalues i = -`max_delta'/`omitted_threshold'{
 		local j = abs(`i')
 		if !missing("`e_t'") gen F`j'_``ev'_name'  = `e_t' == -`j'
-		else if "`nogen_`ev''" == "" cap:  gen F`j'_``ev'_name' = cond(missing(F`j'.``ev'_name'),`fill_missing_with',F`j'.``ev'_name')
+		else if "`nogen_`ev''" == "" cap: gen F`j'_``ev'_name' = F`j'.``ev'_name' == 1
 		if _rc == 110{
 			local old_rc _rc
-			if "`replace_`ev''" == "replace" $esplot_quietly replace F`j'_``ev'_name' = cond(missing(F`j'.``ev'_name'),`fill_missing_with',F`j'.``ev'_name')
+			if "`replace_`ev''" == "replace" $esplot_quietly replace F`j'_``ev'_name' = F`j'.``ev'_name' == 1
 			else {
 				di as error "variable F`j'_``ev'_name' already defined."
 				di as text "Type ..." as input "`ev'(``ev'_name', replace)" as text "... if you'd like to overwrite existing lags/leads"
@@ -329,7 +332,7 @@ foreach ev of local ev_list{
 	}
 	
 	if "`by'" == "" local endpoints "`endpoints' `F_absorb' `L_absorb'"
-	else local endpoints "`endpoints' i.`by'#(c.(`F_absorb') c.(`L_absorb'))"
+	else local endpoints "`endpoints' i.`by'#(`F_absorb' `L_absorb')"
 	
 	/* just save if we said to save, not to save later 
 		(this is because if both passed save, it'll try to preserve twice,
@@ -348,12 +351,13 @@ assert _rc == 621
 
 tempfile regression_results 
 
-if "`regression'" == "reghdfe"{
+if missing(`"`reg_type'"') {
 	$esplot_quietly reghdfe `y' `leads' `lags' `endpoints' `controls' `if' `in' `reg_weights', `main_absorb' `vce' `tolerance'
 }
-else if "`regression'" == "bsqreg"{
-	if !missing("`vce'") di "Warning: option `vce' ignored with quantile regression"
-	$esplot_quietly bsqreg `y' `leads' `lags' `endpoints' `controls' `qreg_fe' `if' `in' `reg_weights',  quantile(`q')
+else {
+	/* $esplot_quietly qrprocess `y' `leads' `lags' `endpoints' `controls' `qreg_fe' `if' `in' `reg_weights',  quantile(`q') `vce' */
+	if !missing(`"`vce'`absorb'`reg_opts'"') local comma ","
+	$esplot_quietly `reg_type' `y' `leads' `lags' `endpoints' `controls' `if' `in' `reg_weights' `comma' `vce' `absorb' `reg_opts'
 }
 
 $esplot_quietly estimates save `regression_results'
@@ -376,7 +380,7 @@ else{
 	log_program `"ES_graph `y', event(`event_name') `pass_by' compare(`compare_name') `pass_window' `estimate_reference' `difference' period_length(`period_length') `colors' `est_plot' `ci_plot' `legend' `wildcard_options' `recenter' "'
 }
 
-if "`savedata'" != ""{
+if `"`savedata'"' != ""{
 	keep lo_* hi_* b_* p_* se_*
 	rename *1 *
 
@@ -865,6 +869,8 @@ end
 program extract_varlist, rclass 
 syntax varlist(fv ts)
 
+fvrevar `varlist'
+ 
 return local varlist `"`varlist'"' 
 
 end 
