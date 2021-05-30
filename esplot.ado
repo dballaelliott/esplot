@@ -1,4 +1,4 @@
-/*! v 0.10.3 16jun2021 Dylan Balla-Elliott, dballaelliott@gmail.com */
+*! v 0.11.0 16jun2021 Dylan Balla-Elliott, dballaelliott@gmail.com *
 
 /* 
 MIT License:
@@ -35,6 +35,7 @@ syntax [varlist(max=2)] [if] [in] [fweight pweight aweight/] [using/], ///
 	[EVent(string asis)] /// event(varname, save nogen)
  	[ /// 
 	/** GENERAL OPTIONS **/
+	ESTimate(string asis) // parse arbitrary estimation command
 	by(varname numeric) ///
 	compare(string asis) /// compare(varname, save nogen)
 	ESTimate_reference ///
@@ -42,8 +43,8 @@ syntax [varlist(max=2)] [if] [in] [fweight pweight aweight/] [using/], ///
 	SAVEData(string asis) ///
 	SAVEESTimates(string asis) ///
 	recenter		///
-	NOFILL /// 
-	save_sample(name) /// 
+	NOFILL ///
+	save_sample(name) ///
 
 	/** START REGRESSION OPTIONS **/
 	CONTROLs(varlist fv ts) absorb(passthru) vce(passthru) /// 
@@ -74,6 +75,10 @@ local wildcard_options `options'
 /*****************************************************
 		Initial checks and warnings
 *****************************************************/
+/* process advanced estimation commands */
+if !missing(`"`estimate'"') gettoken reg_type reg_opts: estimate, parse(",")
+if !missing(`"`reg_opts'"') gettoken comma reg_opts: reg_opts, parse(",")
+
 * make sure we didn't get estimation options if we're going to load in estimates
 if !missing(`"`using'"'){
 	local illegal_using_options "if" "in" "fweight" "pweight" "aweight" ///
@@ -128,11 +133,11 @@ else if `quantile' >= 100 | `quantile' <= 0{
 }
 else if `quantile' >= 1{
 	local q = `quantile'/100
-	local regression bsqreg
+	local regression qreg
 }
 else {
 	local q = `quantile'
-	local regression bsqreg
+	local regression qreg
 }
 
 /* parse FE for quantile regression */
@@ -141,11 +146,15 @@ else local main_absorb "noabsorb"
 
 if `quantile' != -1 & !missing("`absorb'"){
 
-	local absorb_var: subinstr local absorb "absorb(" ""
-	local absorb_var: subinstr local absorb_var ")" ""
-	extract_varlist `absorb_var'
-		
-	local qreg_fe = r(varlist)
+	local absorb_vars: subinstr local absorb "absorb(" ""
+	local absorb_vars: subinstr local absorb_vars ")" ""
+	/* extract_varlist `absorb_var' */
+	
+	/* set emptycells drop */
+	
+	/* fvrevar `absorb_vars' */
+
+	local qreg_fe  `"`absorb_vars'"'
 
 
 }
@@ -275,17 +284,17 @@ else {
 	}
 	/* prepare weights  */
 
-	local reg_weights 
+	local reg_weights
 	if "`exp'" != "" & "`weight'" !="" local reg_weights "[`weight'=`exp']"
 	else if "`exp'" != "" /* and weight is missing */ local reg_weights "[aw=`exp']"
 
-	local lags 
-	local leads 
+	local lags
+	local leads
 	local L_absorb
 	local F_absorb
 	local endpoints
 
-	local e_t_name `e_t' 
+	local e_t_name `e_t'
 	if !missing("`e_t'") local ev_list "e_t"
 
 	** can allow to specify not to fill in missings
@@ -368,29 +377,29 @@ else {
 	if "`save_compare'`save_event'" == "saveLatersaveLater" preserve
 
 	/* double check that we preserved things somewhere */
-	/* ! DELETE BEFORE RELEASE */
 	cap: preserve
 	assert _rc == 621
 
 	tempfile regression_results 
 
-	if "`regression'" == "reghdfe"{
+
+	if missing(`"`reg_type'"') {
 		$esplot_quietly reghdfe `y' `leads' `lags' `endpoints' `controls' `if' `in' `reg_weights', `main_absorb' `vce' `tolerance'
 	}
-	else if "`regression'" == "bsqreg"{
-		if !missing("`vce'") di "Warning: option `vce' ignored with quantile regression"
-		$esplot_quietly bsqreg `y' `leads' `lags' `endpoints' `controls' `qreg_fe' `if' `in' `reg_weights',  quantile(`q')
+	else {
+		if !missing(`"`vce'`absorb'`reg_opts'"') local comma ","
+		$esplot_quietly `reg_type' `y' `leads' `lags' `endpoints' `controls' `if' `in' `reg_weights' `comma' `vce' `absorb' `reg_opts'
 	}
 
 	if !missing("`save_sample'"){
 		/* confirm we can make the variable */
 		replace `save_sample' = e(sample)
 		tempfile sample_info
-		save `sample_info', replace 
+		save `sample_info', replace
 	}
 
-	$esplot_quietly estimates save `regression_results'
-} 
+		$esplot_quietly estimates save `regression_results'
+	}
 
 if !missing(`"`saveestimates'"') $esplot_quietly estimates save `saveestimates'
 
@@ -405,7 +414,7 @@ else{
 	log_program `"ES_graph `y', event(`event_name') `pass_by' compare(`compare_name') `pass_window' `estimate_reference' `difference' period_length(`period_length') `colors' `est_plot' `ci_plot' `legend' `wildcard_options' `recenter' "'
 }
 
-if "`savedata'" != ""{
+if `"`savedata'"' != ""{
 	keep lo_* hi_* b_* p_* se_*
 
 	local periods = floor(abs(`first_period')/`period_length') + floor(`last_period'/`period_length') + 1
@@ -896,6 +905,8 @@ end
 program extract_varlist, rclass 
 syntax varlist(fv ts)
 
+fvrevar `varlist'
+ 
 return local varlist `"`varlist'"' 
 
 end 
