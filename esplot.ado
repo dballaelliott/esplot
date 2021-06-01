@@ -354,8 +354,10 @@ tempfile regression_results
 if missing(`"`reg_type'"') {
 	$esplot_quietly reghdfe `y' `leads' `lags' `endpoints' `controls' `if' `in' `reg_weights', `main_absorb' `vce' `tolerance'
 }
+else if missing(`"`reg_type'"') {
+	$esplot_quietly qreg `y' `leads' `lags' `endpoints' `controls' `qreg_fe' `if' `in' `reg_weights',  quantile(`q') `vce'
+}
 else {
-	/* $esplot_quietly qrprocess `y' `leads' `lags' `endpoints' `controls' `qreg_fe' `if' `in' `reg_weights',  quantile(`q') `vce' */
 	if !missing(`"`vce'`absorb'`reg_opts'"') local comma ","
 	$esplot_quietly `reg_type' `y' `leads' `lags' `endpoints' `controls' `if' `in' `reg_weights' `comma' `vce' `absorb' `reg_opts'
 }
