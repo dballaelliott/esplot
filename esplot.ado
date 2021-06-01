@@ -1,4 +1,4 @@
-/*! v 0.10.1 1jun2021 Dylan Balla-Elliott, dballaelliott@gmail.com */
+/*! v 0.10.2 2jun2021 Dylan Balla-Elliott, dballaelliott@gmail.com */
 
 /* 
 MIT License:
@@ -378,7 +378,6 @@ else{
 
 if "`savedata'" != ""{
 	keep lo_* hi_* b_* p_* se_*
-	rename *1 *
 
 	local periods = floor(abs(`first_period')/`period_length') + floor(`last_period'/`period_length') + 1
  	gen t= _n - abs(floor(`first_period'/`period_length')) - 1 if _n <= `periods' 
