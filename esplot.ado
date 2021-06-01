@@ -1,4 +1,4 @@
-/*! v 0.10.0 24may2021 Dylan Balla-Elliott, dballaelliott@gmail.com */
+/*! v 0.10.1 1jun2021 Dylan Balla-Elliott, dballaelliott@gmail.com */
 
 /* 
 MIT License:
@@ -378,6 +378,7 @@ else{
 
 if "`savedata'" != ""{
 	keep lo_* hi_* b_* p_* se_*
+	rename *1 *
 
 	local periods = floor(abs(`first_period')/`period_length') + floor(`last_period'/`period_length') + 1
  	gen t= _n - abs(floor(`first_period'/`period_length')) - 1 if _n <= `periods' 
@@ -479,6 +480,8 @@ foreach x of local by_groups{
 	mat b_`x' = 0
 	mat se_`x' = 0
 	mat p_`x' = 0
+	mat lo_`x' = 0
+	mat hi_`x' = 0
 
 	// Get pre-period coefficients
 	forvalues t = `first_period'(`period_length')`omitted_threshold'{
@@ -495,6 +498,8 @@ foreach x of local by_groups{
 		mat b_`x' = (b_`x',.)
 		mat se_`x' = (se_`x',.)
 		mat p_`x' = (p_`x',.)
+		mat lo_`x' = (lo_`x',.)
+		mat hi_`x' = (hi_`x',.)
 	}
 
 	//Add dot at event-time 0 
@@ -508,11 +513,15 @@ foreach x of local by_groups{
 	mat b_`x' = b_`x''
 	mat se_`x' = se_`x''
 	mat p_`x' = p_`x''
+	mat lo_`x' = lo_`x''
+	mat hi_`x' = hi_`x''
 
 	svmat b_`x'
 	svmat se_`x'
 	svmat p_`x'
-
+	svmat lo_`x'
+	svmat hi_`x'
+	
 	if !missing("`recenter'"){
 		local reference_to_shift ""
 		
@@ -553,11 +562,6 @@ tempvar t
 quietly: gen `t' = _n - abs(floor(`first_period'/`period_length')) - 1 if _n <= `periods' 
 label variable `t' "event time"
 
-foreach x of local by_groups{
-	
-	$esplot_quietly gen lo_`x' = b_`x'1 - se_`x'1*1.96
-	$esplot_quietly gen hi_`x' = b_`x'1 + se_`x'1*1.96
-}
 
 //matlist b_0 b_1 
  
@@ -575,8 +579,8 @@ if "`force'" != "" & "`yrange'" != ""{
 	local vars T
 	if "`triple_dif'" == "" local vars C T 
 	foreach var of local vars {
-		replace lo_`var' = max(lo_`var',`plot_low_bound')
-		replace hi_`var' = min(hi_`var',`plot_upper_bound')
+		replace lo_`var'1 = max(lo_`var'1,`plot_low_bound')
+		replace hi_`var'1 = min(hi_`var'1,`plot_upper_bound')
 	} 
 }
 /********************************************
@@ -642,17 +646,17 @@ foreach x of local by_groups{
 
 
 	if "`ci_plot'" == "line"{
-		local ci_to_plot `"line lo_`x' hi_`x' `t', lcolor(`"`color_id'`transparency'"' `"`color_id'`transparency'"') lpattern("`.__SCHEME.linepattern.p`plot_id'line'" "`.__SCHEME.linepattern.p`plot_id'line'")"' // lpattern(dash)
+		local ci_to_plot `"line lo_`x'1 hi_`x'1 `t', lcolor(`"`color_id'`transparency'"' `"`color_id'`transparency'"') lpattern("`.__SCHEME.linepattern.p`plot_id'line'" "`.__SCHEME.linepattern.p`plot_id'line'")"' // lpattern(dash)
 		local legend_num = `plot_id'*3
 
 	}
 	else if "`ci_plot'" == "rarea" {
-		local ci_to_plot `" rarea lo_`x' hi_`x' `t', fcolor(`"`color_id'`area_transparency'"') lcolor(`"`color_id'`hide'"') "'
+		local ci_to_plot `" rarea lo_`x'1 hi_`x'1 `t', fcolor(`"`color_id'`area_transparency'"') lcolor(`"`color_id'`hide'"') "'
 		local legend_num = `plot_id'*2 
 	}
 	else  {
 		if "`ci_plot'" != "rcap" & !missing("`ci_plot'") di as text "Unsupported plot type for confidence intervals: " as input "`est_plot'" as text " . Using default"
-		local ci_to_plot `"rcap lo_`x' hi_`x' `t', lcolor(`"`color_id'`transparency'"')"'
+		local ci_to_plot `"rcap lo_`x'1 hi_`x'1 `t', lcolor(`"`color_id'`transparency'"')"'
 		local legend_num = `plot_id'*2 
 	}
 
@@ -670,15 +674,15 @@ foreach x of local by_groups{
 	if "`by'" != "" {
 		if "`:label (`by') `x''" != "`x'"{
 			label var b_`x'1 "Estimates: `:label (`by') `x'' "
-			label var lo_`x' "Lower 95 CI : `:label (`by') `x''"
-			label var hi_`x' "Upper 95 CI : `:label (`by') `x''"
+			label var lo_`x'1 "Lower 95 CI : `:label (`by') `x''"
+			label var hi_`x'1 "Upper 95 CI : `:label (`by') `x''"
 			label var se_`x'1 "Estimate SE : `:label (`by') `x''"
 			label var p_`x'1 "P-Value : `:label (`by') `x''"
 		}
 		else{
 			label var b_`x'1 "Estimates: `by' == `x'  "
-			label var lo_`x' "Lower 95 CI : `by' == `x' "
-			label var hi_`x' "Upper 95 CI : `by' == `x' "
+			label var lo_`x'1 "Lower 95 CI : `by' == `x' "
+			label var hi_`x'1 "Upper 95 CI : `by' == `x' "
 			label var se_`x'1 "Estimate SE : `by' == `x' "
 			label var p_`x'1 "P-Value : `by' == `x' "
 		} 
@@ -826,7 +830,9 @@ if `coef_id' > `base_value' { //if it's not the base case, add the interaction t
 		*plot missing and go to next quarter
 		mat b_`coef_id' = (b_`coef_id',.)
 		mat se_`coef_id' = (se_`coef_id',.)
-		mat p_`coef_id' = (p_`coef_id',.)
+		mat p_`coef_id' = (p_`coef_id',.)		
+		mat lo_`coef_id' = (lo_`coef_id',.)
+		mat hi_`coef_id' = (hi_`coef_id',.)
 
 		exit
 	}
@@ -837,6 +843,8 @@ if "`difference'" == "" & inlist(0,`n_event',`n_comp') { // ** if either list is
 	mat b_`coef_id' = (b_`coef_id',.)
 	mat se_`coef_id' = (se_`coef_id',.)
 	mat p_`coef_id' = (p_`coef_id',.)
+	mat lo_`coef_id' = (lo_`coef_id',.)
+	mat hi_`coef_id' = (hi_`coef_id',.)
 }
 else { // **both of these varlists are non-empty
 	** if it's not a treatment group ,the interactions local is empty and ignored
@@ -848,6 +856,8 @@ else { // **both of these varlists are non-empty
 	mat b_`coef_id' = (b_`coef_id',r(estimate))
 	mat se_`coef_id' = (se_`coef_id',r(se))
 	mat p_`coef_id' = (p_`coef_id',r(p))
+	mat lo_`coef_id' = (lo_`coef_id',r(lb))
+	mat hi_`coef_id' = (hi_`coef_id',r(ub))
 }
 
 end
