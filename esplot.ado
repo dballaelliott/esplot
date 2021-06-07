@@ -419,6 +419,7 @@ else{
 
 if `"`savedata'"' != ""{
 	keep lo_* hi_* b_* p_* se_*
+	if c(stata_version) > 11 version 12: rename *1 *
 
 	local periods = floor(abs(`first_period')/`period_length') + floor(`last_period'/`period_length') + 1
  	gen t= _n - abs(floor(`first_period'/`period_length')) - 1 if _n <= `periods' 
