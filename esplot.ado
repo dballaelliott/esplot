@@ -1,4 +1,4 @@
-*! v 0.11.0 16jun2021 Dylan Balla-Elliott, dballaelliott@gmail.com *
+*! v 0.11.1 16jun2021 Dylan Balla-Elliott, dballaelliott@gmail.com *
 
 /* 
 MIT License:
@@ -386,8 +386,15 @@ else {
 	if missing(`"`reg_type'"') {
 		$esplot_quietly reghdfe `y' `leads' `lags' `endpoints' `controls' `if' `in' `reg_weights', `main_absorb' `vce' `tolerance'
 	}
-	else if missing(`"`reg_type'"') & !missing("`q'") {
+	else if missing(`"`reg_type'"') & !missing(`"`q'"') {
 		$esplot_quietly qreg `y' `leads' `lags' `endpoints' `controls' `qreg_fe' `if' `in' `reg_weights',  quantile(`q') `vce'
+	}
+	else if inlist(`"`reg_type'"', "stcox","streg") {
+		if !missing(`"`vce'`absorb'`reg_opts'"') local comma ","
+		* streg and stcox don't use the outcome variables, that's captured in the stset
+		di as input "`reg_type' " as text "does not take an outcome variable. `y' was not included in the regression"
+		di as text "type" as input " estimates " as text "for more information"
+		$esplot_quietly `reg_type' `leads' `lags' `endpoints' `controls' `if' `in' `reg_weights' `comma' `vce' `absorb' `reg_opts'
 	}
 	else {
 		if !missing(`"`vce'`absorb'`reg_opts'"') local comma ","
