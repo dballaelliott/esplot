@@ -322,8 +322,8 @@ else {
 			/* else error _rc  */
 
 			if `i' <= `last_period'{
-				if "`by'" == "" local lags "`lags' L`i'_``ev'_name'" 
-				else local lags "`lags' L`i'_``ev'_name' i.`by'#c.L`i'_``ev'_name'" 
+				if "`by'" == "" local lags "`lags' L`i'_``ev'_name'"
+				else local lags "`lags' L`i'_``ev'_name' i.`by'#c.L`i'_``ev'_name'"
 			}
 			else local L_absorb "`L_absorb' L`i'_``ev'_name' " 
 		}
@@ -380,7 +380,7 @@ else {
 	cap: preserve
 	assert _rc == 621
 
-	tempfile regression_results 
+	tempfile regression_results
 
 
 	if missing(`"`reg_type'"') {
