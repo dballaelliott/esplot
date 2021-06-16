@@ -1,4 +1,4 @@
-/*! v 0.10.1 1jun2021 Dylan Balla-Elliott, dballaelliott@gmail.com */
+/*! v 0.10.3 16jun2021 Dylan Balla-Elliott, dballaelliott@gmail.com */
 
 /* 
 MIT License:
@@ -31,7 +31,7 @@ version 11
 
 #delimit ;
 /* TODO : make difference a by sub-option */
-syntax varlist(max=2) [if] [in] [fweight pweight aweight/], ///
+syntax [varlist(max=2)] [if] [in] [fweight pweight aweight/] [using/], ///
 	[EVent(string asis)] /// event(varname, save nogen)
  	[ /// 
 	/** GENERAL OPTIONS **/
@@ -39,9 +39,11 @@ syntax varlist(max=2) [if] [in] [fweight pweight aweight/], ///
 	compare(string asis) /// compare(varname, save nogen)
 	ESTimate_reference ///
 	difference ///
-	SAVEdata(string asis) ///
+	SAVEData(string asis) ///
+	SAVEESTimates(string asis) ///
 	recenter		///
 	NOFILL /// 
+	save_sample(name) /// 
 
 	/** START REGRESSION OPTIONS **/
 	CONTROLs(varlist fv ts) absorb(passthru) vce(passthru) /// 
@@ -53,7 +55,6 @@ syntax varlist(max=2) [if] [in] [fweight pweight aweight/], ///
 	COLors(passthru) ///
 	est_plot(passthru) ci_plot(passthru) ///
 	legend(passthru) /// 
-	save_sample(name) /// 
 
 	/** quantile regression **/
 	Quantile(real -1) ///
@@ -73,6 +74,22 @@ local wildcard_options `options'
 /*****************************************************
 		Initial checks and warnings
 *****************************************************/
+* make sure we didn't get estimation options if we're going to load in estimates
+if !missing(`"`using'"'){
+	local illegal_using_options "if" "in" "fweight" "pweight" "aweight" ///
+		"savedata" "nofill" "saveestimates" "controls" "absorb" ///
+		"vce" "tolerance" "save_sample"
+
+	foreach bad_var of local illegal_using_options{
+		if !missing(`"``bad_var''"') {
+			di as error "option {it:`bad_var'} not allowed with {it:using}"
+			exit 198
+		}
+	}
+
+	if `quantile' != 1 di as error "Warning: quantile will be ignored "
+}
+
 /* process window and suboptions */
 local window_raw `window'
 tokenize `: subinstr local window_raw "," "|" ', parse("|")
@@ -151,45 +168,47 @@ if `:word count `varlist'' == 2 & !missing("`event'`compare'") {
 	exit 
 }
 
-
+/* -------------------------- parse window options -------------------------- */
 if "`window'" != "" {
 	gettoken first_period last_period: (local) window
 	if `first_period' >= 0 di as text "Warning: No pre-period displayed. Try adjusting " as input "window"
 }
 
 if missing("`e_t'"){
-	$esplot_quietly tsset 
-	local id `r(panelvar)'
-	local max_delta = `r(tmax)' - `r(tmin)'
+		$esplot_quietly tsset 
+		local max_delta = `r(tmax)' - `r(tmin)'
 
-	if "`window'" == ""{
-		local first_period = -`max_delta'
-		local last_period = `max_delta'
+		if "`window'" == ""{
+			local first_period = -`max_delta'
+			local last_period = `max_delta'
+		}
 	}
-}
-else {
-	qui: su `e_t'
+	else {
+		qui: su `e_t'
 
-	local max_delta = max(abs(r(min)),r(max))
+		local max_delta = max(abs(r(min)),r(max))
 
-	if "`window'" == ""{
-		local first_period = r(min)
-		local last_period = r(max)
+		if "`window'" == ""{
+			local first_period = r(min)
+			local last_period = r(max)
+		}
 	}
-}
 
-if "`estimate_reference'" != "" local omitted_threshold = - 1
-else local omitted_threshold = - `period_length' - 1
+	if "`estimate_reference'" != "" local omitted_threshold = - 1
+	else local omitted_threshold = - `period_length' - 1
 
-if "`by'" != "" local pass_by = "by(`by')"
-local pass_window = "window(`first_period' `last_period')"
+	if "`by'" != "" local pass_by = "by(`by')"
+	local pass_window = "window(`first_period' `last_period')"
 
-if "`by'" == "" & "`difference'" != ""{
-	di as error "Error:" as input "by" as error "is required to use" as input "difference"
-	exit 
-}
+	if "`by'" == "" & "`difference'" != ""{
+		di as error "Error:" as input "by" as error "is required to use" as input "difference"
+		exit 
+	}
 
-/* PARSE EVENT AND COMPARE */
+
+	
+	
+/* --------------------- PARSE EVENT AND COMPARE OPTIONS -------------------- */
 tokenize `: subinstr local event "," "|" ', parse("|")
 local event_name `1'
 if "`3'" != ""{
@@ -226,144 +245,154 @@ foreach arg in 1 2 3{
 }
 }
 
-// make sure we didn't get both save and nogen, that doesn't make sense 
-foreach ev in "compare" "event"{
-if "`save_`ev''`nogen_`ev''" == "savenogen"{
-	 di as error "Please select at most one of save and nogen in `ev'."
-	 exit
-}  
-if "`nogen_`ev''`replace_`ev''" == "nogenreplace"{
-	 di as error "Please select at most one of replace and nogen in `ev'."
-	 exit
-}  
+** load the estimates if that option is provided
+if !missing(`"`using'"'){
+	estimates use `using'
 }
-
-if "`save_compare'" == "save" & "`save_event'" == "" local ev_list compare event
-else local ev_list event compare
-
-// if we aren't saving anything, preserve now
-if "`save_compare'`save_event'" == "" preserve
-if "`save_compare'`save_event'" == "savesave"{
-	local save_compare saveLater
-	local save_event saveLater
-}
-/* prepare weights  */
-
-local reg_weights 
-if "`exp'" != "" & "`weight'" !="" local reg_weights "[`weight'=`exp']"
-else if "`exp'" != "" /* and weight is missing */ local reg_weights "[aw=`exp']"
-
-local lags 
-local leads 
-local L_absorb
-local F_absorb
-local endpoints
-
-local e_t_name `e_t' 
-if !missing("`e_t'") local ev_list "e_t"
-
-** can allow to specify not to fill in missings
-if missing("`nofill'") local fill_missing_with 0
-else if "`nofill'" == "nofill" local fill_missing_with .
-
-foreach ev of local ev_list{
-	//if "`nogen_`ev''" == "nogen" continue
-	if "``ev'_name'" == "" continue
-	// Make event lags..
-	forvalues i = 0/`max_delta'{
-		if !missing("`e_t'") gen L`i'_``ev'_name' = `e_t' == `i'
-		else if "`nogen_`ev''" == "" cap: gen L`i'_``ev'_name' = cond(missing(L`i'.``ev'_name'),`fill_missing_with',L`i'.``ev'_name')
-
-		if _rc == 110{
-			local old_rc _rc
-			if "`replace_`ev''" == "replace" $esplot_quietly replace L`i'_``ev'_name' = cond(missing(L`i'.``ev'_name'),`fill_missing_with',L`i'.``ev'_name')
-			else {
-				di as error "variable  L`i'_``ev'_name' already defined."
-				di as text "Type ..." as input "`ev'(``ev'_name', replace)" as text "... if you'd like to overwrite existing lags/leads"
-				di as text "Type ..." as input "`ev'(``ev'_name', nogen)" as text "... if you'd like to use the lags/leads in memory"
-				error `old_rc'
-			}
-		}
-		/* else error _rc  */
-
-		if `i' <= `last_period'{
-			if "`by'" == "" local lags "`lags' L`i'_``ev'_name'" 
-			else local lags "`lags' L`i'_``ev'_name' i.`by'#c.L`i'_``ev'_name'" 
-		}
-		else local L_absorb "`L_absorb' L`i'_``ev'_name' " 
-	}
-	// .. and event leads
-	forvalues i = -`max_delta'/`omitted_threshold'{
-		local j = abs(`i')
-		if !missing("`e_t'") gen F`j'_``ev'_name'  = `e_t' == -`j'
-		else if "`nogen_`ev''" == "" cap:  gen F`j'_``ev'_name' = cond(missing(F`j'.``ev'_name'),`fill_missing_with',F`j'.``ev'_name')
-		if _rc == 110{
-			local old_rc _rc
-			if "`replace_`ev''" == "replace" $esplot_quietly replace F`j'_``ev'_name' = cond(missing(F`j'.``ev'_name'),`fill_missing_with',F`j'.``ev'_name')
-			else {
-				di as error "variable F`j'_``ev'_name' already defined."
-				di as text "Type ..." as input "`ev'(``ev'_name', replace)" as text "... if you'd like to overwrite existing lags/leads"
-				di as text "Type ..." as input "`ev'(``ev'_name', nogen)" as text "... if you'd like to use the lags/leads in memory"
-				error `old_rc'
-			}
-		}
-		/* else error _rc  */
-
-		if `i' >= `first_period'{
-			if "`by'" == "" local leads "`leads' F`j'_``ev'_name'"
-			else local leads "`leads' F`j'_``ev'_name' i.`by'#c.F`j'_``ev'_name'"
-		}	
-		else local F_absorb " `F_absorb' F`j'_``ev'_name'"
-	}
-
-	if inlist("`window_option'","bin_pre","bin") {
-		if "`replace_`ev''" == "replace" $esplot_quietly cap: drop F_end_``ev'_name'
-		if "`nogen_`ev''" == "" $esplot_quietly egen F_end_``ev'_name' = rowmax(`F_absorb')
-		local F_absorb F_end_``ev'_name'
-	}
-
-	if inlist("`window_option'","bin_post","bin"){
-		if "`replace_`ev''" == "replace" $esplot_quietly cap: drop L_end_``ev'_name'
-		if "`nogen_`ev''" == "" $esplot_quietly egen L_end_``ev'_name' = rowmax(`L_absorb')
-		local L_absorb L_end_``ev'_name'
-	}
+else {
+** otherwise, run the regression
 	
-	if "`by'" == "" local endpoints "`endpoints' `F_absorb' `L_absorb'"
-	else local endpoints "`endpoints' i.`by'#(c.(`F_absorb') c.(`L_absorb'))"
-	
-	/* just save if we said to save, not to save later 
-		(this is because if both passed save, it'll try to preserve twice,
-		so we switch to "saveLater" if both pass save)
-		We should only have it as save if one is save and the 
-		other is NOT save*/
-	if "`save_`ev''" == "save" preserve
-}
-/* preserve after both are made if both passed save */
-if "`save_compare'`save_event'" == "saveLatersaveLater" preserve
+	// make sure we didn't get both save and nogen, that doesn't make sense 
+	foreach ev in "compare" "event"{
+	if "`save_`ev''`nogen_`ev''" == "savenogen"{
+		di as error "Please select at most one of save and nogen in `ev'."
+		exit
+	}  
+	if "`nogen_`ev''`replace_`ev''" == "nogenreplace"{
+		di as error "Please select at most one of replace and nogen in `ev'."
+		exit
+	}  
+	}
 
-/* double check that we preserved things somewhere */
-/* ! DELETE BEFORE RELEASE */
-cap: preserve
-assert _rc == 621
+	if "`save_compare'" == "save" & "`save_event'" == "" local ev_list compare event
+	else local ev_list event compare
 
-tempfile regression_results 
+	// if we aren't saving anything, preserve now
+	if "`save_compare'`save_event'" == "" preserve
+	if "`save_compare'`save_event'" == "savesave"{
+		local save_compare saveLater
+		local save_event saveLater
+	}
+	/* prepare weights  */
 
-if "`regression'" == "reghdfe"{
-	$esplot_quietly reghdfe `y' `leads' `lags' `endpoints' `controls' `if' `in' `reg_weights', `main_absorb' `vce' `tolerance'
-}
-else if "`regression'" == "bsqreg"{
-	if !missing("`vce'") di "Warning: option `vce' ignored with quantile regression"
-	$esplot_quietly bsqreg `y' `leads' `lags' `endpoints' `controls' `qreg_fe' `if' `in' `reg_weights',  quantile(`q')
-}
+	local reg_weights 
+	if "`exp'" != "" & "`weight'" !="" local reg_weights "[`weight'=`exp']"
+	else if "`exp'" != "" /* and weight is missing */ local reg_weights "[aw=`exp']"
 
-$esplot_quietly estimates save `regression_results'
+	local lags 
+	local leads 
+	local L_absorb
+	local F_absorb
+	local endpoints
 
-if !missing("`save_sample'"){
-	/* confirm we can make the variable */
-	replace `save_sample' = e(sample)
-	tempfile sample_info
-	save `sample_info', replace 
-}
+	local e_t_name `e_t' 
+	if !missing("`e_t'") local ev_list "e_t"
+
+	** can allow to specify not to fill in missings
+	if missing("`nofill'") local fill_missing_with 0
+	else if "`nofill'" == "nofill" local fill_missing_with .
+
+	foreach ev of local ev_list{
+		//if "`nogen_`ev''" == "nogen" continue
+		if "``ev'_name'" == "" continue
+		// Make event lags..
+		forvalues i = 0/`max_delta'{
+			if !missing("`e_t'") gen L`i'_``ev'_name' = `e_t' == `i'
+			else if "`nogen_`ev''" == "" cap: gen L`i'_``ev'_name' = cond(missing(L`i'.``ev'_name'),`fill_missing_with',L`i'.``ev'_name')
+
+			if _rc == 110{
+				local old_rc _rc
+				if "`replace_`ev''" == "replace" $esplot_quietly replace L`i'_``ev'_name' = cond(missing(L`i'.``ev'_name'),`fill_missing_with',L`i'.``ev'_name')
+				else {
+					di as error "variable  L`i'_``ev'_name' already defined."
+					di as text "Type ..." as input "`ev'(``ev'_name', replace)" as text "... if you'd like to overwrite existing lags/leads"
+					di as text "Type ..." as input "`ev'(``ev'_name', nogen)" as text "... if you'd like to use the lags/leads in memory"
+					error `old_rc'
+				}
+			}
+			/* else error _rc  */
+
+			if `i' <= `last_period'{
+				if "`by'" == "" local lags "`lags' L`i'_``ev'_name'" 
+				else local lags "`lags' L`i'_``ev'_name' i.`by'#c.L`i'_``ev'_name'" 
+			}
+			else local L_absorb "`L_absorb' L`i'_``ev'_name' " 
+		}
+		// .. and event leads
+		forvalues i = -`max_delta'/`omitted_threshold'{
+			local j = abs(`i')
+			if !missing("`e_t'") gen F`j'_``ev'_name'  = `e_t' == -`j'
+			else if "`nogen_`ev''" == "" cap:  gen F`j'_``ev'_name' = cond(missing(F`j'.``ev'_name'),`fill_missing_with',F`j'.``ev'_name')
+			if _rc == 110{
+				local old_rc _rc
+				if "`replace_`ev''" == "replace" $esplot_quietly replace F`j'_``ev'_name' = cond(missing(F`j'.``ev'_name'),`fill_missing_with',F`j'.``ev'_name')
+				else {
+					di as error "variable F`j'_``ev'_name' already defined."
+					di as text "Type ..." as input "`ev'(``ev'_name', replace)" as text "... if you'd like to overwrite existing lags/leads"
+					di as text "Type ..." as input "`ev'(``ev'_name', nogen)" as text "... if you'd like to use the lags/leads in memory"
+					error `old_rc'
+				}
+			}
+			/* else error _rc  */
+
+			if `i' >= `first_period'{
+				if "`by'" == "" local leads "`leads' F`j'_``ev'_name'"
+				else local leads "`leads' F`j'_``ev'_name' i.`by'#c.F`j'_``ev'_name'"
+			}	
+			else local F_absorb " `F_absorb' F`j'_``ev'_name'"
+		}
+
+		if inlist("`window_option'","bin_pre","bin") {
+			if "`replace_`ev''" == "replace" $esplot_quietly cap: drop F_end_``ev'_name'
+			if "`nogen_`ev''" == "" $esplot_quietly egen F_end_``ev'_name' = rowmax(`F_absorb')
+			local F_absorb F_end_``ev'_name'
+		}
+
+		if inlist("`window_option'","bin_post","bin"){
+			if "`replace_`ev''" == "replace" $esplot_quietly cap: drop L_end_``ev'_name'
+			if "`nogen_`ev''" == "" $esplot_quietly egen L_end_``ev'_name' = rowmax(`L_absorb')
+			local L_absorb L_end_``ev'_name'
+		}
+		
+		if "`by'" == "" local endpoints "`endpoints' `F_absorb' `L_absorb'"
+		else local endpoints "`endpoints' i.`by'#(c.(`F_absorb') c.(`L_absorb'))"
+		
+		/* just save if we said to save, not to save later 
+			(this is because if both passed save, it'll try to preserve twice,
+			so we switch to "saveLater" if both pass save)
+			We should only have it as save if one is save and the 
+			other is NOT save*/
+		if "`save_`ev''" == "save" preserve
+	}
+	/* preserve after both are made if both passed save */
+	if "`save_compare'`save_event'" == "saveLatersaveLater" preserve
+
+	/* double check that we preserved things somewhere */
+	/* ! DELETE BEFORE RELEASE */
+	cap: preserve
+	assert _rc == 621
+
+	tempfile regression_results 
+
+	if "`regression'" == "reghdfe"{
+		$esplot_quietly reghdfe `y' `leads' `lags' `endpoints' `controls' `if' `in' `reg_weights', `main_absorb' `vce' `tolerance'
+	}
+	else if "`regression'" == "bsqreg"{
+		if !missing("`vce'") di "Warning: option `vce' ignored with quantile regression"
+		$esplot_quietly bsqreg `y' `leads' `lags' `endpoints' `controls' `qreg_fe' `if' `in' `reg_weights',  quantile(`q')
+	}
+
+	if !missing("`save_sample'"){
+		/* confirm we can make the variable */
+		replace `save_sample' = e(sample)
+		tempfile sample_info
+		save `sample_info', replace 
+	}
+
+	$esplot_quietly estimates save `regression_results'
+} 
+
+if !missing(`"`saveestimates'"') $esplot_quietly estimates save `saveestimates'
 
 /* if we have event time, then that's our event */
 if missing("`event_name'")  local event_name "`e_t'"
@@ -378,7 +407,6 @@ else{
 
 if "`savedata'" != ""{
 	keep lo_* hi_* b_* p_* se_*
-	rename *1 *
 
 	local periods = floor(abs(`first_period')/`period_length') + floor(`last_period'/`period_length') + 1
  	gen t= _n - abs(floor(`first_period'/`period_length')) - 1 if _n <= `periods' 
@@ -392,7 +420,9 @@ if "`savedata'" != ""{
 	if "`3'" != "" save `1' , `3'
 	else save `1'
 }
-restore 
+
+** restore the original data if we did any processing
+if missing(`"`using'"') restore 
 
 if !missing("`save_sample'"){
 	use `sample_info', clear 
@@ -401,7 +431,8 @@ if !missing("`save_sample'"){
 }
 
 * expose the regression results to the user 
-$esplot_quietly estimates use `regression_results'
+* if using is passed, then regression_results will be empty
+$esplot_quietly estimates use `"`regression_results'`using'"'
 end
 
 

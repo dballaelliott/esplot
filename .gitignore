@@ -10,6 +10,9 @@ logs/*/*
 *.csv 
 !example/example.csv
 
+# ignore saved estimates
+**/*.ster
+
 
 
 # ignore package info 
