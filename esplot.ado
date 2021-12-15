@@ -382,8 +382,12 @@ else {
 
 	tempfile regression_results
 
-	else if missing(`"`reg_type'"') & !missing(`"`q'"') {
+
+	if missing(`"`reg_type'"') & !missing(`"`q'"') {
 		$esplot_quietly qreg `y' `leads' `lags' `endpoints' `controls' `qreg_fe' `if' `in' `reg_weights',  quantile(`q') `vce'
+	}
+	else if missing(`"`reg_type'"') {
+		$esplot_quietly reghdfe `y' `leads' `lags' `endpoints' `controls' `if' `in' `reg_weights', `main_absorb' `vce' `tolerance'
 	}
 	else if inlist(`"`reg_type'"', "stcox","streg") {
 		if !missing(`"`vce'`absorb'`reg_opts'"') local comma ","
