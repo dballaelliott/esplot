@@ -1,8 +1,16 @@
 # esplot: a stata package for event study plots
 
+
+**NOTE: this package is outdated. It estimates dynamic DiD coefficients via TWFE. While this was the standard approach for many years, it is now known to be quite fragile. See [What’s Trending in Difference-in-Differences? A Synthesis of the Recent Econometrics Literature](https://www.jonathandroth.com/assets/files/DiD_Review_Paper.pdf) for a discussion of why these TWFE specifications are difficult to interpret, and not generally an appropriate specification with more than one treatment date.** 
+
+Excellent packages exist that implement DiD/event study estimation using the new, robust methods. **You should not use this code.**  Instead use should use the [stata package](https://friosavila.github.io/playingwithstata/main_csdid.html) `cs_did` or the [R package](https://cran.r-project.org/web/packages/did/vignettes/did-basics.html) `did`.  
+
+
+_This repository exists for backward compatability and documentation of an existing command_
+
+
 Event study plots are increasingly popular in applied research. `esplot` is a new command for stata allowing researchers to quickly and easily create event study plots.
 
-**Note that this package is under active development and is frequently updated.** As a result, new features are frequently added; sometimes bugs come along with these new features, but I am often able to patch them quickly when they are reported.
 
 ## Install
 
