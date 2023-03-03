@@ -1,0 +1,610 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+      <link rel="shortcut icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.4.2, mkdocs-material-6.2.3">
+    
+    
+      
+        <title>Documentation - esplot: a stata package for event study plots</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.15aa0b43.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.75751829.min.css">
+        
+      
+    
+    
+    
+      
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway:300,400,400i,700%7CFira+Code&display=fallback">
+        <style>body,input{font-family:"Raleway",-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"Fira Code",SFMono-Regular,Consolas,Menlo,monospace}</style>
+      
+    
+    
+    
+    
+      
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="preference" data-md-color-primary="" data-md-color-accent="">
+      
+        <script>matchMedia("(prefers-color-scheme: dark)").matches&&document.body.setAttribute("data-md-color-scheme","slate")</script>
+      
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#documentation" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header-nav md-grid" aria-label="Header">
+    <a href=".." title="esplot: a stata package for event study plots" class="md-header-nav__button md-logo" aria-label="esplot: a stata package for event study plots">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M1.5 1.75a.75.75 0 00-1.5 0v12.5c0 .414.336.75.75.75h14.5a.75.75 0 000-1.5H1.5V1.75zm14.28 2.53a.75.75 0 00-1.06-1.06L10 7.94 7.53 5.47a.75.75 0 00-1.06 0L3.22 8.72a.75.75 0 001.06 1.06L7 7.06l2.47 2.47a.75.75 0 001.06 0l5.25-5.25z"/></svg>
+
+    </a>
+    <label class="md-header-nav__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2z"/></svg>
+    </label>
+    <div class="md-header-nav__title" data-md-component="header-title">
+      <div class="md-header-nav__ellipsis">
+        <div class="md-header-nav__topic">
+          <span class="md-ellipsis">
+            esplot: a stata package for event study plots
+          </span>
+        </div>
+        <div class="md-header-nav__topic">
+          <span class="md-ellipsis">
+            
+              Documentation
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      <label class="md-header-nav__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0116 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 019.5 16 6.5 6.5 0 013 9.5 6.5 6.5 0 019.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+      </label>
+      
+<div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" data-md-state="active" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0116 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 019.5 16 6.5 6.5 0 013 9.5 6.5 6.5 0 019.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+      </label>
+      <button type="reset" class="md-search__icon md-icon" aria-label="Clear" data-md-component="search-reset" tabindex="-1">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+      </button>
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header-nav__source">
+        
+<a href="https://github.com/dballaelliott/esplot" title="Go to repository" class="md-source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05L244 40.45a28.87 28.87 0 00-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 01-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 000 40.81l195.61 195.6a28.86 28.86 0 0040.8 0l194.69-194.69a28.86 28.86 0 000-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    dballaelliott/esplot
+  </div>
+</a>
+      </div>
+    
+  </nav>
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-tabs__inner md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+
+
+  <li class="md-tabs__item">
+    <a href=".." class="md-tabs__link">
+      Getting Started
+    </a>
+  </li>
+
+      
+        
+  
+  
+    
+  
+
+
+  <li class="md-tabs__item">
+    <a href="./" class="md-tabs__link md-tabs__link--active">
+      Documentation
+    </a>
+  </li>
+
+      
+    </ul>
+  </div>
+</nav>
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="esplot: a stata package for event study plots" class="md-nav__button md-logo" aria-label="esplot: a stata package for event study plots">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M1.5 1.75a.75.75 0 00-1.5 0v12.5c0 .414.336.75.75.75h14.5a.75.75 0 000-1.5H1.5V1.75zm14.28 2.53a.75.75 0 00-1.06-1.06L10 7.94 7.53 5.47a.75.75 0 00-1.06 0L3.22 8.72a.75.75 0 001.06 1.06L7 7.06l2.47 2.47a.75.75 0 001.06 0l5.25-5.25z"/></svg>
+
+    </a>
+    esplot: a stata package for event study plots
+  </label>
+  
+    <div class="md-nav__source">
+      
+<a href="https://github.com/dballaelliott/esplot" title="Go to repository" class="md-source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05L244 40.45a28.87 28.87 0 00-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 01-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 000 40.81l195.61 195.6a28.86 28.86 0 0040.8 0l194.69-194.69a28.86 28.86 0 000-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    dballaelliott/esplot
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+
+
+  <li class="md-nav__item">
+    <a href=".." class="md-nav__link">
+      Getting Started
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  
+
+
+  <li class="md-nav__item md-nav__item--active">
+    
+    <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+    
+      
+    
+    
+      <label class="md-nav__link md-nav__link--active" for="__toc">
+        Documentation
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+    
+    <a href="./" class="md-nav__link md-nav__link--active">
+      Documentation
+    </a>
+    
+      
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#core-syntax" class="md-nav__link">
+    Core Syntax
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#options" class="md-nav__link">
+    Options
+  </a>
+  
+    <nav class="md-nav" aria-label="Options">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#general-options" class="md-nav__link">
+    General Options
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#regression-options" class="md-nav__link">
+    Regression Options
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#display-options" class="md-nav__link">
+    Display Options
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+    
+  </li>
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#core-syntax" class="md-nav__link">
+    Core Syntax
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#options" class="md-nav__link">
+    Options
+  </a>
+  
+    <nav class="md-nav" aria-label="Options">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#general-options" class="md-nav__link">
+    General Options
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#regression-options" class="md-nav__link">
+    Regression Options
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#display-options" class="md-nav__link">
+    Display Options
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content">
+            <article class="md-content__inner md-typeset">
+              
+                
+                  <a href="https://github.com/dballaelliott/esplot/edit/master/docs/options.md" title="Edit this page" class="md-content__button md-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
+                  </a>
+                
+                
+                <h1 id="documentation">Documentation<a class="headerlink" href="#documentation" title="Permanent link">⚓︎</a></h1>
+<h2 id="core-syntax">Core Syntax<a class="headerlink" href="#core-syntax" title="Permanent link">⚓︎</a></h2>
+<p><code>esplot</code> can be called one of two ways. </p>
+<ol>
+<li>
+<p>with an event-time variable:</p>
+<p><code>esplot &lt;outcome&gt; &lt;event_time&gt; [, options]</code></p>
+</li>
+<li>
+<p>or with an event indicator (on panel data):</p>
+<p><code>esplot &lt;outcome&gt;, event(&lt;event_indicator&gt; [, suboptions]) [options]</code></p>
+</li>
+</ol>
+<h2 id="options">Options<a class="headerlink" href="#options" title="Permanent link">⚓︎</a></h2>
+<h3 id="general-options">General Options<a class="headerlink" href="#general-options" title="Permanent link">⚓︎</a></h3>
+<dl>
+<dt><code>compare(&lt;event_indicator&gt; [, options])</code></dt>
+<dd>
+<p><strong>Only available when using the <code>event(&lt;event_indicator&gt;)</code> syntax.</strong>
+Plot the <em>difference</em> between the event-time coefficents associated with the event in <code>event</code> and the event given in <code>compare</code>. For example, <code>esplot infected, event(treatment) compare(placebo)</code> will estimate event-time coefficents around the <code>treatment</code> event and the <code>placebo</code> event and will plot the difference between the <code>treatment</code> and <code>placebo</code> arms. </p>
+<details class="info">
+<summary>event_indicator suboptions (for compare and event)</summary>
+<dl>
+<dt><code>save</code></dt>
+<dd>this causes the vector of relative-time indicators created by <code>esplot</code> around the event given in either <code>event</code> or <code>compare</code> to be saved to memory. This option is useful when running many specifications of the same event study, as it can save time when used with <code>nogen</code> by creating this vector only once. </dd>
+<dt><code>nogen</code></dt>
+<dd>this vector tells <code>esplot</code> that the vector of relative-time indicators around this particular event already exist (probably aftering being created by an earlier call to <code>esplot</code> with the <code>save</code> option.)</dd>
+<dt><code>replace</code></dt>
+<dd>allows <code>esplot</code> to write over the existing vector of relative-time indicators (rarely used.)</dd>
+</dl>
+<p><strong>example</strong></p>
+<pre><code>esplot income, event(treatment, save)       // saves indicators...
+esplot ln_income, event(treatment, nogen)   // use saved indicators
+</code></pre>
+</details>
+</dd>
+<dt><code>window(start end [, options])</code></dt>
+<dd>display dynamic effect estimates (event-time coefficents) ranging from <code>start</code> to <code>end</code>. <code>start</code> should be less than zero; <code>end</code> should be greater than zero. </dd>
+<dd>
+<p><code>window</code> recognizes four suboptions that control how endpoints (i.e. periods <em>outside</em> the window) should be treated. By default, <code>esplot</code> will fully saturate the model with relative time indicators for every possible period, except for the omitted period (t = -1). The <code>bin</code>, <code>bin_pre</code>, and <code>bin_post</code> cause endpoints to be binned; see below for more information.</p>
+<details class="info">
+<summary>endpoint suboptions (for window)</summary>
+<dl>
+<dt><code>saturate</code></dt>
+<dd>default option, equivalent to typing nothing. <code>esplot</code> will find the maximum and minimum relative time periods supported in the data (i.e. the last period in the data minus the earliest event, and the first period in the data minus the latest event.) Then <code>esplot</code> will fully saturate the model will all possible relative time periods. Some of these coefficients may not be well identified (some may even drop out).</dd>
+<dt><code>bin</code></dt>
+<dd>Define an indicator for <span class="arithmatex">\(j &lt;\)</span> start and an indicator for <span class="arithmatex">\(j &gt;\)</span> end, where <span class="arithmatex">\(j\)</span> is relative time. Rather than including all possible event-time indicators, we "bin" all event-time indicators before/after the window starts/ends. Thus, rather than estimating the full set of dynamic effects, we estimate dynamic effects only within the specified window, and estimate (but do not plot) constant long-run effects before and after the window. </dd>
+<dt><code>bin_pre</code></dt>
+<dd>Define an indicator for <span class="arithmatex">\(j &lt;\)</span> start, but use all possible post-event relative time indicators for estimation. </dd>
+<dt><code>bin_post</code></dt>
+<dd>Define an indicator for <span class="arithmatex">\(j &gt;\)</span> end, but use all possible pre-event relative time indicators for estimation. </dd>
+</dl>
+<p><strong>Further reading</strong></p>
+<p>There is a very active applied econometric literature concerning the correct specification of event-study estimates. </p>
+<p><a href="https://dx.doi.org/10.2139/ssrn.3794018">Baker, Larcker, &amp; Wang, 2021</a> show that binned and saturated models can lead to substantively different estimates, especially in the presence of pre-trends. <code>esplot</code> therefore makes both options available to users.</p>
+<p>It uses the fully saturated model as the default since this enforces the least structure on the research design. <a href="https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2826228">Borusyak &amp; Jaravel, 2018</a> argue that the fully saturated model is most robust to long run pre- and post- trends, since it does not impose a parametric assumption on dynamic effects before/after a given period.  </p>
+<p>Researchers are then, of course, free to impose that structure as a design choice with any of the three variants of the window sub-options. <a href="https://hdl.handle.net/10419/215676">Schmidheiny &amp; Siegloch, 2020</a> show that imposing the structure implied by binning (i.e. that effects are constant before/after some periods) can improve identification of time fixed effects. </p>
+</details>
+</dd>
+<dt><code>by(varname)</code></dt>
+<dd>estimate coefficents seperately for each level of <code>by</code>. For example, <code>esplot wage years_since_policy, by(education)</code> will estimate the event-time coefficients for the relative time given in <code>years_since_policy</code> seperately for each level of <code>education</code> and plot as many series as there are levels of education. </dd>
+<dt><code>difference</code></dt>
+<dd>
+<p>estimate coefficents relative to the base-level of <code>by</code>. For example, if <code>education</code> has <span class="arithmatex">\(k\)</span> levels, then typing <code>esplot wage years_since_policy, by(education)</code> will estimate the event-time coefficients for the relative time given in <code>years_since_policy</code> seperately for each level of <code>education</code> and plot the difference between each of the <span class="arithmatex">\(k-1\)</span> sets of event-time coefficients and the base level of the <code>by</code> variable.</p>
+<p>Using <code>difference</code> in combination with <code>compare</code> allows for the estimation of difference-in-difference-in-difference coefficients. </p>
+</dd>
+<dt><code>estimate_reference</code></dt>
+<dd>by default, <code>esplot</code> includes indicator variables for all relative time periods except for -1. If the <code>estimate_reference</code> option is specified, the indicator for -1 is included and explicitly differenced out of the rest of the coefficients. When used with <code>by</code>, it recenters each series indepently, so that each series is mechanically 0 at time -1.</dd>
+<dt><code>savedata(filename [,replace])</code></dt>
+<dd>in addition to plotting directly, <code>esplot</code> will save the estimated coefficients to <code>filename</code>. This allows for the greatest flexibility in plotting the estimates. Coefficents are saved <em>after</em> applying all operations, like differencing (<code>difference</code> or <code>compare</code>), or pooling (<code>period_length</code>). Can be abbreviated <code>save(...)</code>.</dd>
+<dt><code>save_sample(varname)</code></dt>
+<dd>store the output of <code>e(sample)</code> in <code>varname</code> following the internal regression call. </dd>
+</dl>
+<h3 id="regression-options">Regression Options<a class="headerlink" href="#regression-options" title="Permanent link">⚓︎</a></h3>
+<dl>
+<dt><code>controls(varlist)</code></dt>
+<dd>additional control variables to be included in the internal regression call.</dd>
+<dt><code>absorb(varlist)</code></dt>
+<dd>a vector of fixed effects to absorbed and not estimated in the internal regression call. <code>help reghdfe##absvar</code> for more information. </dd>
+<dt><code>vce(vcetype, subopt)</code></dt>
+<dd>specify the types of standard errors computed. <code>help reghdfe##opt_vce</code> for more information. Not compatible with <code>quantile</code>.</dd>
+<dt><code>quantile(0 &lt; k &lt; 100)</code></dt>
+<dd>if this option is specified, <code>esplot</code> will use a quantile regression, rather than OLS. <code>quantile(50)</code> and <code>quantile(.5)</code> are synonyms, and will cause <code>esplot</code> to estimate a median regression. </dd>
+</dl>
+<p>weights are allowed when using OLS (default), but not when <code>quantile</code> is specified. </p>
+<h3 id="display-options">Display Options<a class="headerlink" href="#display-options" title="Permanent link">⚓︎</a></h3>
+<dl>
+<dt><code>period_length(integer)</code></dt>
+<dd>pool dynamic effect coefficients in groups of <code>period_length</code> before plotting. </dd>
+<dt><code>colors(colorstylelist)</code></dt>
+<dd>
+<p>ordered list of colors; used for point estimates and confidence intervals.  </p>
+<details class="note">
+<summary>using custom colors</summary>
+<p>while Stata provides a set of named colors, it is often desirable to use custom RGB codes further personalize graphics. 
+<code>esplot</code> will correctly parse a list of quote-delimited RGB value. For example: <code>colors("220 114 107" "0 171 176")</code>. </p>
+<p>If these quotes are not provided, Stata will parse each number as an entry in the list. If compound double quotes are used, the entire list will be treated as single object.</p>
+<p>To use <code>colorpalette</code> schemes with <code>esplot</code>, simply pass the <code>`r(p)'</code> object directly to the sub-option, without enclosing in quotes. For example: </p>
+<div class="highlight"><pre><span></span><code>colorpalette HCL dark, n(2) nograph 
+esplot y t , colors(`r(p)&#39;)   
+</code></pre></div>
+</details>
+</dd>
+</dl>
+<p>Additional <code>twoway</code> options can be specified and will be passed through to the internal <code>twoway</code> call. <code>help twoway_options</code></p>
+                
+              
+              
+                
+
+
+              
+            </article>
+          </div>
+        </div>
+      </main>
+      
+        
+<footer class="md-footer">
+  
+    <div class="md-footer-nav">
+      <nav class="md-footer-nav__inner md-grid" aria-label="Footer">
+        
+          <a href=".." class="md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+            <div class="md-footer-nav__button md-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+            </div>
+            <div class="md-footer-nav__title">
+              <div class="md-ellipsis">
+                <span class="md-footer-nav__direction">
+                  Previous
+                </span>
+                Getting Started
+              </div>
+            </div>
+          </a>
+        
+        
+      </nav>
+    </div>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-footer-copyright">
+        
+        Made with
+        <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+          Material for MkDocs
+        </a>
+      </div>
+      
+  <div class="md-footer-social">
+    
+      
+      
+        
+        
+      
+      <a href="https://twitter.com/dballaelliott" target="_blank" rel="noopener" title="twitter.com" class="md-footer-social__link">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M459.37 151.716c.325 4.548.325 9.097.325 13.645 0 138.72-105.583 298.558-298.558 298.558-59.452 0-114.68-17.219-161.137-47.106 8.447.974 16.568 1.299 25.34 1.299 49.055 0 94.213-16.568 130.274-44.832-46.132-.975-84.792-31.188-98.112-72.772 6.498.974 12.995 1.624 19.818 1.624 9.421 0 18.843-1.3 27.614-3.573-48.081-9.747-84.143-51.98-84.143-102.985v-1.299c13.969 7.797 30.214 12.67 47.431 13.319-28.264-18.843-46.781-51.005-46.781-87.391 0-19.492 5.197-37.36 14.294-52.954 51.655 63.675 129.3 105.258 216.365 109.807-1.624-7.797-2.599-15.918-2.599-24.04 0-57.828 46.782-104.934 104.934-104.934 30.213 0 57.502 12.67 76.67 33.137 23.715-4.548 46.456-13.32 66.599-25.34-7.798 24.366-24.366 44.833-46.132 57.827 21.117-2.273 41.584-8.122 60.426-16.243-14.292 20.791-32.161 39.308-52.628 54.253z"/></svg>
+      </a>
+    
+      
+      
+        
+        
+      
+      <a href="https://github.com/dballaelliott" target="_blank" rel="noopener" title="github.com" class="md-footer-social__link">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+      </a>
+    
+  </div>
+
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    
+      <script src="../assets/javascripts/vendor.93c04032.min.js"></script>
+      <script src="../assets/javascripts/bundle.83e5331e.min.js"></script><script id="__lang" type="application/json">{"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing"}</script>
+      
+      <script>
+        app = initialize({
+          base: "..",
+          features: ['navigation.tabs', 'navigation.sections', 'navigation.integrate', 'navigation.instant', 'navigation.expand'],
+          search: Object.assign({
+            worker: "../assets/javascripts/worker/search.8c7e0a7e.min.js"
+          }, typeof search !== "undefined" && search)
+        })
+      </script>
+      
+        <script src="../javascripts/config.js"></script>
+      
+        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+    
+  </body>
+</html>
